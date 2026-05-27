@@ -83,5 +83,3 @@ userSchema.methods.generateRefreshToken = function () {
 }
 
 export const userModel = mongoose.model('User', userSchema)
-
-l
