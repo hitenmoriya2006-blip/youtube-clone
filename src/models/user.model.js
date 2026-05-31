@@ -1,13 +1,13 @@
-const mongoose = require('mongoose')
-const brycpt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+import mongoose from 'mongoose'
+import brycpt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
         unique: true,
-        lowerCase: true,
+        lowercase: true,
         index: true
     },
     fullName: {
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
     },
     watchHistory: [
         {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: 'Video'
         }
     ]
@@ -47,10 +47,12 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.pre("save", async function (next) {
-    if (this.isModified('password')) {
-        this.password = brycpt.hash(this.password, 10)
-        next()
-    }
+
+    if (!this.isModified("password")) return next()
+
+    this.password = await brycpt.hash(this.password, 10)
+
+    next()
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
@@ -58,7 +60,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
-    jwt.sign({
+    return jwt.sign({
         _id: this._id,
         email: this.email,
         username: this.username,
@@ -72,12 +74,12 @@ userSchema.methods.generateAccessToken = function () {
 }
 
 userSchema.methods.generateRefreshToken = function () {
-    jwt.sign({
+    return jwt.sign({
         _id: this._id,
     },
-        process.env.ACCESS_REFRESH_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: process.env.ACCESS_REFRESH_VALID
+            expiresIn: process.env.REFRESH_TOKEN_VALID
         }
     )
 }

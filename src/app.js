@@ -1,8 +1,8 @@
-const express = require('express')
+import express from 'express'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import userRoutes from './routes/user.route.js'
 const app = express()
-const cookieParser = require('cookie-parser')
-const cors =  require('cors')
-const e = require('express')
 
 app.use(cors())
 
@@ -11,6 +11,8 @@ app.use(express.urlencoded({extended:true,limit:'16kb'}))
 app.use(express.static("public"))
 app.use(cookieParser())
 
-module.exports = app
+app.use('/api/v1/users',userRoutes)
+
+export default app
 
 
