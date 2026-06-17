@@ -28,8 +28,14 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
+    avatarPublicID:{
+        type:String
+    },
     coverImage: {
         type: String
+    },
+    coverImagePublicID:{
+        type:String
     },
     refreshToken: {
         type: String

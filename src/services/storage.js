@@ -1,6 +1,7 @@
 import {v2 as cloudinary } from 'cloudinary'
 import fs from 'fs'
 import dotenv from 'dotenv'
+import { ApiError } from '../utils/ApiError';
 dotenv.config()
 
 cloudinary.config({ 
@@ -28,5 +29,23 @@ async function uploadOnCloudinary (localFilePath){
 
 }
 
-export {uploadOnCloudinary}
+async function deleteFromCloudinary(publicId) {
+    if (!publicId) return null;
+
+    try {
+        const response = await cloudinary.uploader.destroy(publicId);
+
+        if (response.result !== "ok") {
+            throw new Error(`Cloudinary deletion failed: ${response.result}`);
+        }
+
+        return response;
+    } catch (error) {
+        console.error("Cloudinary delete error:", error.message);
+        throw error;
+    }
+}
+
+
+export {uploadOnCloudinary  ,deleteFromCloudinary}
 
