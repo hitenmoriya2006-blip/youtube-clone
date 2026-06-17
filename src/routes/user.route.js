@@ -1,5 +1,15 @@
 import express from 'express'
-import {userRegistration, loginUser,logoutUser} from '../controllers/user.controller.js'
+import {userRegistration,
+        loginUser,
+        logoutUser,
+        changeCurrentPassword,
+        getCurrentUser,
+        updateAccountDetail,
+        updateAvatarImage,
+        updateCoverImage,
+        getChannelDetails,
+        getWatchHistory
+      } from '../controllers/user.controller.js'
 import {upload} from '../middlewares/multer.middleware.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
 
@@ -18,5 +28,12 @@ router.route('/register').post(upload.fields([
 
 router.route('/login').post(loginUser)
 router.route('/logout').post(authMiddleware,logoutUser)
+router.route('/change-password').post(authMiddleware,changeCurrentPassword)
+router.route('/current-user').get(authMiddleware,getCurrentUser)
+router.route('/update-account').patch(authMiddleware,updateAccountDetail)
+router.route('/avatar').patch(authMiddleware,upload.single('avatar'),updateAvatarImage)
+router.route('cover-image').patch(authMiddleware,upload.single('coverImage'),updateCoverImage)
+router.route('/channel/:username').get(authMiddleware,getChannelDetails)
+router.route('/history').get(authMiddleware,getWatchHistory)
 
 export default router
