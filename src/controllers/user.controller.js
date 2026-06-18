@@ -150,8 +150,8 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
    await userModel.findByIdAndUpdate(req.user._id,
       {
-         $set: {
-            refreshToken: undefined
+         $unset: {
+            refreshToken: 1
          }
       },
       {
@@ -369,7 +369,9 @@ const getChannelDetails = asyncHandler(async (req,res) =>{
       throw new ApiError(400,'username is missing!')
    }
 
-   const channel = userModel.aggregate([
+   console.log("req.user =", req.user);  
+
+   const channel = await userModel.aggregate([
       {
          $match:{
             username: username.toLowerCase()
@@ -380,7 +382,7 @@ const getChannelDetails = asyncHandler(async (req,res) =>{
             from:'subscriptions',
             localField:'_id',
             foreignField:'channel',
-            as:'subscriber'
+            as:'subscribers'
          }
       },
       {
@@ -394,14 +396,14 @@ const getChannelDetails = asyncHandler(async (req,res) =>{
       {
          $addFields:{
             subscribersCount:{
-               $size:'$subscriber',
+               $size:'$subscribers',
             },
             channelsSubscribedToCount:{
                $size:'$subscribedTo'
             },
             isSubscribed:{
-               $conf:{
-                  if:{$in:[req.user?._id,'$subscribers.subscriber']},
+               $cond:{
+                  if:{$in: [req.user?._id,'$subscribers.subscriber']},
                   then:true,
                   else:false
                }
@@ -418,7 +420,8 @@ const getChannelDetails = asyncHandler(async (req,res) =>{
             channelsSubscribedToCount:1,
             avatar:1,
             coverImage:1,
-            isSubscribed:1
+            isSubscribed:1,
+            watchHistory:1
          }
       }
    ])
@@ -491,6 +494,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
 export { userRegistration,
          loginUser, 
          logoutUser, 
+         refreshAccessToken,
          getCurrentUser, 
          updateAccountDetail, 
          changeCurrentPassword,
