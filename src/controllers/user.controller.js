@@ -3,8 +3,6 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from '../utils/ApiResponse.js'
 import { deleteFromCloudinary, uploadOnCloudinary } from "../services/storage.js"
 import { userModel } from "../models/user.model.js"
-import { log } from "console"
-import { json } from "stream/consumers"
 import cookieParser from "cookie-parser"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const mongooseAggregatePaginate = require('mongoose-paginate-v2')
+import mongoose from 'mongoose'
+import mongooseAggregatePaginate from 'mongoose-paginate-v2' 
 
 const videoSchema = new mongoose.Schema({
    videoFile: {
@@ -18,11 +18,7 @@ const videoSchema = new mongoose.Schema({
       type: String,
       required: true
    },
-   channelName: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-   },
-   isPubblished: {
+   isPublished: {
       type: Boolean,
       default: true
    },
@@ -35,7 +31,7 @@ const videoSchema = new mongoose.Schema({
       required: true
    },
    owner: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User"
    }
 }, {
