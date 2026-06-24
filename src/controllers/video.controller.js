@@ -29,7 +29,9 @@ const publishVideo = asyncHandler(async (req, res) => {
 
   const video = await videoModel.create({
     videoFile: videoFile.url,
+    videoFilePublicId: videoFile.public_id,
     thumbnail: thumbnail.url,
+    thumbnailPublicId: thumbnail.public_id,
     title: title,
     description: description,
     owner: req.user?._id,
@@ -136,15 +138,15 @@ const getAllVideo = asyncHandler(async (req, res) => {
   const limitNumber = Number(limit)
 
   if (
-  Number.isNaN(pageNumber) ||
-  Number.isNaN(limitNumber)
-) {
-  throw new ApiError(400, 'Page and limit must be numbers')
-}
+    Number.isNaN(pageNumber) ||
+    Number.isNaN(limitNumber)
+  ) {
+    throw new ApiError(400, 'Page and limit must be numbers')
+  }
 
-   if (pageNumber < 1 || limitNumber < 1) {
-  throw new ApiError(400, 'Page and limit must be greater than 0')
-}
+  if (pageNumber < 1 || limitNumber < 1) {
+    throw new ApiError(400, 'Page and limit must be greater than 0')
+  }
 
   const skip = (pageNumber - 1) * limitNumber
 
@@ -257,4 +259,144 @@ const getAllVideo = asyncHandler(async (req, res) => {
     ))
 })
 
-export { publishVideo, getVideoById }
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params
+  const { title, description } = req.body
+  const thumbnailLocalPAth = req.file?.path
+
+  if (!(title || description || thumbnailLocalPAth)) {
+    throw new ApiError(400, 'title ,description or thumbnail is required')
+  }
+
+  if (videoId && !mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, 'Invalid videoId')
+  }
+
+  let updateField = {}
+
+  if (title) {
+    updateField.title = title
+  }
+
+  if (description) {
+    updateField.description = description
+  }
+
+  const video = await videoModel.findById(videoId)
+
+  if (!video) {
+    throw new ApiError(404, 'Video not found')
+  }
+
+  if (!video.owner.equals(req.user?._id)) {
+    throw new ApiError(403, 'User is not authorized')
+  }
+
+  let thumbnail;
+
+  if (thumbnailLocalPAth) {
+    thumbnail = await uploadOnCloudinary(thumbnailLocalPAth)
+
+    if (!thumbnail) {
+      throw new ApiError(500, 'something went wrong')
+    }
+    await deleteFromCloudinary(video?.thumbnailPublicId)
+
+    updateField.thumbnail = thumbnail.url
+  }
+
+  const updatedVideo = await videoModel.findByIdAndUpdate(videoId,
+    {
+      $set: updateFeild
+    },
+    {
+      returnDocument: 'after'
+    }
+  )
+
+  return res
+    .status(200)
+    .json(new ApiResponse(
+      200,
+      { updatedVideo },
+      'video updated successfully'
+    ))
+})
+
+const deleteVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params
+
+  if (videoId && !mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, 'Invalid videoId')
+  }
+
+  const video = await videoModel.findById(videoId)
+
+  if (!video) {
+    throw new ApiError(404, 'Video not found')
+  }
+
+  if (!video.owner.equals(req.user?._id)) {
+    throw new ApiError(403, 'User is not authorized')
+  }
+
+  if (video.thumbnailPublicId) {
+    await deleteFromCloudinary(video.thumbnailPublicId)
+  }
+
+  if (video.videoFilePublicId) {
+    await deleteFromCloudinary(video.videoFilePublicId)
+  }
+
+  const deleted = await videoModel.findByIdAndDelete(videoId)
+
+  return res
+    .status(200)
+    .json(new ApiResponse(
+      200,
+      {},
+      'video deleted successfully'
+    ))
+
+})
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req.params
+
+  if (videoId && !mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, 'Invalid videoId')
+  }
+
+  const video = await videoModel.findById(videoId)
+
+  if (!video) {
+    throw new ApiError(404, 'Video not found')
+  }
+
+  if (!video.owner.equals(req.user?._id)) {
+    throw new ApiError(403, 'User is not authorized')
+  }
+
+  const updatedVideo = await videoModel.findByIdAndUpdate(videoId, {
+    $set: {
+      isPublished: !video.isPublished
+    }
+  },
+    {
+      returnDocument: 'after'
+    })
+
+  if (!updatedVideo) {
+    throw new ApiError(500, 'something went wrong')
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(
+      200,
+      { updatedVideo },
+      'video updated successfully'
+    ))
+})
+
+export { publishVideo, getVideoById, getAllVideo, updateVideo, deleteVideo, togglePublishStatus }
