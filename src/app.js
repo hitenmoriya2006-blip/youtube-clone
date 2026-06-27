@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import userRoutes from './routes/user.route.js'
 import videoRoutes from './routes/video.route.js'
+import subscriptionRoute from './routes/subscription.route.js'
 const app = express()
 
 app.use(cors())
@@ -14,6 +15,7 @@ app.use(cookieParser())
 
 app.use('/api/v1/users',userRoutes)
 app.use('/api/v1/videos',videoRoutes)
+app.use('/api/v1/subscription',subscriptionRoute)
 
 export default app
 
