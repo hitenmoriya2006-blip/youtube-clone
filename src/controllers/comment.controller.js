@@ -214,8 +214,6 @@ const getVideoComments = asyncHandler(async (req, res) => {
         aggregation,
         options
     )
-
-   console.log(allComments);
    
     return res
             .status(200)
@@ -230,13 +228,3 @@ const getVideoComments = asyncHandler(async (req, res) => {
 export {addComment,updateComment
     ,deleteComment,getVideoComments
 }
-
-
-
-
-
-
-
-
-
-
