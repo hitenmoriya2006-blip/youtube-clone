@@ -111,7 +111,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Video not found')
   }
 
-  await videoModel.findByIdAndUpdate(videoID, {
+  await videoModel.findByIdAndUpdate(videoID,{
     $inc: {
       views: 1
     }
