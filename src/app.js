@@ -7,6 +7,8 @@ import subscriptionRoute from './routes/subscription.route.js'
 import likeRoute from './routes/like.route.js'
 import commmentRoute from './routes/comment.route.js'
 import dashboardRoute from './routes/dashboard.route.js'
+import playlistRoutes from './routes/playlist.route.js'
+
 const app = express()
 
 app.use(cors())
@@ -22,5 +24,6 @@ app.use('/api/v1/subscription',subscriptionRoute)
 app.use('/api/v1/like',likeRoute)
 app.use('/api/v1/comment',commmentRoute)
 app.use('/api/v1/dashboard',dashboardRoute)
+app.use('/api/v1/playlist',playlistRoutes)
 
 export default app 
