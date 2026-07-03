@@ -14,12 +14,12 @@ const router = express.Router()
 
 router.use(authMiddleware);
 
-router.route('/create').post(createPlaylist)
+router.route('/create/:userId').post(createPlaylist)
 router.route('/user/:userId').get(getUserPlaylists)
 router.route('/:playlistId').get(getPlaylistById)
 router.route('/add/:videoId/:playlistId').patch(addVideoToPlaylist)
 router.route('/delete/:playlistId').delete(deletePlaylist)
-router.route('remove/:videoId/:playlistId').patch(removeVideoFromPlaylist)
+router.route('/remove/:videoId/:playlistId').patch(removeVideoFromPlaylist)
 router.route('/update/:playlistId').patch(updatePlaylist)
 
 export default router

@@ -13,8 +13,8 @@ const getChannelStats = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'user id is required')
     }
 
-    const [videoStats, subscribersStats, likesStats] = Promise.all(
-        videoModel.aggregate([
+    const [videoStats, subscribersStats, likesStats] = await Promise.all([
+         videoModel.aggregate([
             {
                 $match: {
                     owner: userId
@@ -77,8 +77,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
                 }
             }
         ])
-
-    )
+    ])
 
     const totalVideos = videoStats[0]?.totalVideos ?? 0
     const totalViews = videoStats[0]?.totalViews ?? 0
@@ -161,7 +160,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
             .json(new ApiResponse(
                 200,
                 allVideos,
-                'no video upload bby the creator'
+                'no video upload by the creator'
             ))
     }
 

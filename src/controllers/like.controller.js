@@ -194,47 +194,6 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 
 })
 
-const toggleTweetLike = asyncHandler(async (req, res) => {
-    const { tweetId } = req.params
-    const userId = req.user?._id
-
-    if(!tweetId){
-         throw new ApiError(404, 'tweetId is required')
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
-        throw new ApiError(400, 'Invalid tweetId')
-    }
-
-    const tweet = await videoModel.findById(tweetId)
-
-    if(!tweet){
-        throw new ApiError(404,'tweet not found')
-    }
-
-    const alreadyExist = await likeModel.findOne({
-        likedBy: userId,
-        tweet: tweetId
-    })
-
-    if (!alreadyExist) {
-        await likeModel.create({
-            likedBy: userId,
-            tweet: tweetId
-        })
-    } else {
-        await alreadyExist.deleteOne()
-    }
-
-     return res
-             .status(200)
-             .json(new ApiResponse(
-                200,
-                alreadyExist ? {liked:false} : {liked:true},
-                alreadyExist ? 'tweet unliked successfully' : 'tweet liked successfully'
-             ))
-
-})
 
 
-export { getLikedVideo,toggleVideoLike, toggleCommentLike, toggleTweetLike }
+export { getLikedVideo,toggleVideoLike, toggleCommentLike,  }

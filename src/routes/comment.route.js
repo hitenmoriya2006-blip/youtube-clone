@@ -9,7 +9,7 @@ import {addComment,
 const router = express.Router()
 
 router.route('/add/:videoId').post(authMiddleware,addComment)
-router.route('/update/:commmentId').patch(authMiddleware,updateComment)
+router.route('/update/:commentId').patch(authMiddleware,updateComment)
 router.route('/delete/:commentId').delete(authMiddleware,deleteComment)
 router.route('/get-comments/:videoId').get(authMiddleware,getVideoComments)
 

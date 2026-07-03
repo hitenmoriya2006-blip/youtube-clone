@@ -1,14 +1,17 @@
 import mongoose from "mongoose";
-import { videoModel } from "../models/video.model";
-import { playlistModel } from "../models/playlist.model";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import { videoModel } from "../models/video.model.js";
+import { playlistModel } from "../models/playlist.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
     const { name, description } = req.body
     const userId = req.user?._id
     const { videoId } = req.params
+
+    console.log(name);
+
 
     if (!name) {
         throw new ApiError(400, 'name is required')
@@ -63,6 +66,9 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     const playList = await playlistModel.find({
         owner: userId
     })
+
+    console.log(playList);
+
 
     if (playList.length === 0) {
         return res
@@ -147,7 +153,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     }
 
     if (!(userId.equals(isPlaylistExist.owner))) {
-        throw new ApiError(403, `user don't have authorization`)
+        throw new ApiError(403, `user dont have authorization`)
     }
 
     const newPlaylist = await playlistModel.findByIdAndUpdate(
@@ -311,6 +317,9 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     },
         {
             $set: updateFields
+        },
+        {
+            new: true
         })
 
     if (updatedPlaylist === null) {

@@ -38,7 +38,7 @@ const addComment = asyncHandler(async (req, res) => {
         throw new ApiError(500, 'something went wrong')
     }
 
-    const commentFullDetails = await commentModel.findById(Added._id).populate('owner', 'fullName username avatar')
+    const commentFullDetails = await commentModel.findById(createdComment._id).populate('owner', 'fullName username avatar')
 
     return res
         .status(201)
@@ -51,11 +51,11 @@ const addComment = asyncHandler(async (req, res) => {
 
 const updateComment = asyncHandler(async (req, res) => {
     const { commentId } = req.params
-    const { commentValue } = req.body
+    const { comment } = req.body
 
-    const newComment = commentValue.trim()
+    const newComment = comment.trim()
 
-    if (!commentValue || newComment === '') {
+    if (!comment || newComment === '') {
         throw new ApiError(400, 'comment is required')
     }
 
