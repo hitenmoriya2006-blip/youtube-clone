@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-yt-bg: #0f0f0f;
+  --color-yt-surface: #121414;
+  --color-yt-surface-container: #1e2020;
+  --color-yt-surface-container-high: #282a2b;
+  --color-yt-surface-container-highest: #333535;
+  --color-yt-surface-variant: #333535;
+  --color-yt-on-surface: #e2e2e2;
+  --color-yt-on-surface-variant: #aaaaaa;
+  --color-yt-red: #ff0000;
+  --color-yt-blue: #3ea6ff;
+  --font-headline: "Hanken Grotesk", sans-serif;
+  --font-body: "Roboto Flex", sans-serif;
+}
