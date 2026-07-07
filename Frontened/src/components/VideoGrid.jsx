@@ -123,24 +123,36 @@ const MOCK_SHORTS = [
     title: "Beautiful sunset timelapse 🌅",
     views: "450K views",
     thumbnail: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=400&q=80"
+  },
+  {
+    id: 6,
+    title: "Coding hack you NEED to know 💻",
+    views: "1.1M views",
+    thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80"
   }
 ];
 
 
-const VideoGrid = ({ videos = MOCK_VIDEOS, shorts = MOCK_SHORTS }) => {
+const VideoGrid = ({videos,shorts = MOCK_SHORTS}) => {
   return (
-    <div className="p-4 sm:p-6 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-10 gap-x-4">
-      {videos.slice(0, 4).map((video) => (
-        <VideoCard key={video.id} {...video} />
+    <div className="p-4 sm:p-6 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8.5 gap-x-4">
+      {videos.map((video) => (
+        <VideoCard key={video._id} {...video} />
       ))}
       
       <ShortsShelf shorts={shorts} />
       
-      {videos.slice(4).map((video) => (
+      {/* {videos.slice(4).map((video) => (
         <VideoCard key={video.id} {...video} />
-      ))}
+      ))} */}
     </div>
   );
 };
 
 export default VideoGrid;
+
+// { videos = MOCK_VIDEOS, shorts = MOCK_SHORTS }
+// {videos.slice(0, 1).map((video) => (
+//         <VideoCard key={video._id} {...video} />
+//       ))}
+

@@ -1,8 +1,31 @@
 import React from 'react';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen }) => {
+  if (!isOpen) {
+    return (
+      <nav className="fixed left-0 top-[56px] w-[72px] h-[calc(100vh-56px)] bg-background flex flex-col items-center py-1 gap-1 overflow-y-auto overflow-x-hidden z-50 hidden lg:flex hide-scrollbar">
+        <a className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface bg-surface-container-highest transition-colors font-medium" href="#">
+          <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
+          <span className="text-[10px] scale-90 whitespace-nowrap">Home</span>
+        </a>
+        <a className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+          <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>bolt</span>
+          <span className="text-[10px] scale-90 whitespace-nowrap">Shorts</span>
+        </a>
+        <a className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+          <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>subscriptions</span>
+          <span className="text-[10px] scale-90 whitespace-nowrap">Subscriptions</span>
+        </a>
+        <a className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+          <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>account_circle</span>
+          <span className="text-[10px] scale-90 whitespace-nowrap">You</span>
+        </a>
+      </nav>
+    );
+  }
+
   return (
-    <nav className="fixed left-0 top-[56px] w-[240px] h-[calc(100vh-56px)] bg-background flex-col p-3 overflow-y-auto overflow-x-hidden z-50 hidden lg:flex hover:overflow-y-auto hide-scrollbar">
+    <nav className="fixed left-0 top-[56px] w-[240px] h-[calc(100vh-56px)] bg-background flex flex-col p-3 overflow-y-auto overflow-x-hidden z-50 hidden lg:flex hover:overflow-y-auto hide-scrollbar transition-all duration-200">
       {/* Main Nav */}
       <div className="flex flex-col gap-0.5 py-3 border-b border-white/10 pt-0">
         <a className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface bg-surface-container-highest font-bold transition-colors" href="#">

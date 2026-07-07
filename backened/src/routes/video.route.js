@@ -15,7 +15,7 @@ router.route('/publish').post(upload.fields([
         maxCount:1
     }
 ]),authMiddleware,publishVideo)
-router.route('/get/:videoID').get(getVideoById)
+router.route('/get/:videoId').get(getVideoById)
 router.route('/get-all').get(getAllVideo)
 router.route('/update/:videoId').patch(authMiddleware,upload.single('thumbnail'),updateVideo)
 router.route('/delete/:videoId').delete(authMiddleware,deleteVideo)
