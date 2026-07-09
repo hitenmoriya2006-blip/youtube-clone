@@ -360,8 +360,6 @@ const getChannelDetails = asyncHandler(async (req, res) => {
       throw new ApiError(400, 'username is missing!')
    }
 
-   console.log("req.user =", req.user);
-
    const channel = await userModel.aggregate([
       {
          $match: {
@@ -417,7 +415,10 @@ const getChannelDetails = asyncHandler(async (req, res) => {
       }
    ])
 
-   if (!channel?.length) {
+   console.log(`channel data ${channel}`);
+   
+
+   if (channel?.length === 0) {
       throw new ApiError(404, 'channel doesnot exists')
    }
 

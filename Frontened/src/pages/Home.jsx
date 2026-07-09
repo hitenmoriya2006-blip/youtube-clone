@@ -6,13 +6,10 @@ import VideoGrid from '../components/VideoGrid';
 import axios from 'axios'
 
 function Home() {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+
   const [allVideos, setallVideos] = useState([])
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
-  };
-
+  
   useEffect(() => {
     const fetchAllVideos = async () => {
       try {
@@ -24,7 +21,7 @@ function Home() {
         if (response) {
           setallVideos(response.data.data.allVideos)
           console.log(allVideos);
-          
+
         }
       } catch (error) {
         console.log(error.response?.status);
@@ -35,17 +32,13 @@ function Home() {
   }, [])
 
   return (
-    <div className="text-on-surface bg-background">
-      <Header onMenuClick={toggleSidebar} />
-      <Sidebar isOpen={isSidebarOpen} />
-      <main className={`mt-[56px] ${isSidebarOpen ? 'lg:ml-[240px]' : 'lg:ml-[72px]'} h-[calc(100vh-56px)] overflow-y-auto bg-background transition-all duration-200`}>
-        <ChipBar />
-        <VideoGrid videos={allVideos} />
-      </main>
-    </div>
+    <>
+      <ChipBar />
+      <VideoGrid videos={allVideos} />
+    </>
   );
 }
 
 export default Home;
 
-// lg:ml-[240px]
+

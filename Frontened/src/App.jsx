@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter,Outlet,RouterProvider } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Watch from './pages/Watch';
+import Channel from './pages/Channel';
 import { useDispatch } from 'react-redux';
 import { login } from './features/auth/authSlice';
 import axios from 'axios'
 import './index.css';
+import MainLayout from './layout/MainLayout';
+import AuthLayout from './layout/AuthLayout';
 
 function App() {
 
@@ -35,16 +38,51 @@ function App() {
     getCurrentUser();
   }, [dispatch]);
 
+  const router = createBrowserRouter([
+    {
+      element: <MainLayout/>,
+      children:[
+        {
+          path:'/',
+          element:<Home />
+        },
+        {
+          path:`/watch/:videoId`,
+          element:<Watch />
+        },
+        {
+          path:`/channel/:channelId`,
+          element:<Channel />
+        }
+      ]
+    },
+    {
+      element:<AuthLayout />,
+      children:[
+        {
+          path:'/login',
+          element:<Login />
+        },
+        {
+          path:'/signup',
+          element:<Signup />
+        }
+      ]
+    }
+  ])
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/watch/:videoId" element={<Watch />} />
-      </Routes>
-    </BrowserRouter>
-  );
+   <RouterProvider router={router}/>
+  )
 }
 
 export default App;
+
+//  <BrowserRouter>
+//       <Routes>
+//         <Route path="/" element={<Home />} />
+//         <Route path="/login" element={<Login />} />
+//         <Route path="/signup" element={<Signup />} />
+//         <Route path="/watch/:videoId" element={<Watch />} />
+//       </Routes>
+//     </BrowserRouter>

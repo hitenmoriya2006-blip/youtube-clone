@@ -4,6 +4,7 @@ import { ApiResponse } from '../utils/ApiResponse.js'
 import { deleteFromCloudinary, uploadOnCloudinary } from "../services/storage.js"
 import { userModel } from "../models/user.model.js"
 import { videoModel } from '../models/video.model.js'
+import { subscriptionModel } from '../models/subscription.model.js'
 import mongoose from "mongoose"
 
 const publishVideo = asyncHandler(async (req, res) => {
@@ -49,13 +50,13 @@ const publishVideo = asyncHandler(async (req, res) => {
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
-  const { videoID } = req.params
+  const { videoId } = req.params
 
-  if (!videoID) {
+  if (!videoId) {
     throw new ApiError(400, 'video ID is required')
   }
 
-  const validVideoID = mongoose.Types.ObjectId.isValid(videoID)
+  const validVideoID = mongoose.Types.ObjectId.isValid(videoId)
 
   if (!validVideoID) {
     throw new ApiError(400, 'Invalid videoId')
@@ -64,7 +65,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   const fetchedVideo = await videoModel.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(videoID)
+        _id: new mongoose.Types.ObjectId(videoId)
       }
     },
     {
@@ -76,6 +77,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         pipeline: [
           {
             $project: {
+              _id: 1,
               fullName: 1,
               username: 1,
               email: 1,
@@ -94,6 +96,38 @@ const getVideoById = asyncHandler(async (req, res) => {
       }
     },
     {
+      $lookup: {
+        from: 'subscriptions',
+        localField: 'owner._id',
+        foreignField: 'channel',
+        as: 'totalSubscribers'
+      }
+    },
+    {
+      $lookup: {
+        from: 'likes',
+        localField: '_id',
+        foreignField: 'video',
+        as: 'totalLikes'
+      }
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: '$totalSubscribers'
+        },
+        isSubscribed: {
+          $in: [req.user?._id, "$totalSubscribers.subscriber"]
+        },
+        likesCount: {
+          $size: '$totalLikes'
+        },
+        isLiked:{
+          $in: [req.user?._id, "$totalLikes.likedBy"]
+        }
+      }
+    },
+    {
       $project: {
         videoFile: 1,
         thumbnail: 1,
@@ -102,7 +136,12 @@ const getVideoById = asyncHandler(async (req, res) => {
         isPublished: 1,
         views: 1,
         owner: 1,
-        duration: 1
+        duration: 1,
+        createdAt: 1,
+        subscribersCount: 1,
+        isSubscribed: 1,
+        likesCount: 1,
+        isLiked:1
       }
     }
   ])
@@ -111,7 +150,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Video not found')
   }
 
-  await videoModel.findByIdAndUpdate(videoID,{
+  await videoModel.findByIdAndUpdate(videoId, {
     $inc: {
       views: 1
     }
