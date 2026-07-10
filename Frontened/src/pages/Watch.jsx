@@ -28,7 +28,6 @@ const Watch = () => {
           setvideo(response.data.data)
           setIsSubscribed(response.data.data.isSubscribed);
           setIsLiked(response.data.data.isLiked)
-          console.log(response.data.data)
         }
       } catch (error) {
         console.log(error.response?.status);
@@ -87,7 +86,6 @@ const Watch = () => {
         )
         if (response) {
           setAllComments(response.data.data.docs)
-          console.log(response);
         }
       } catch (error) {
         console.log(error.response?.status);
@@ -133,9 +131,6 @@ const Watch = () => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  console.log(suggestedVideos);
-
-
   const addComment = async () => {
     try {
       const response = await axios.post(`http://localhost:3000/api/v1/comment/add/${videoId}`,
@@ -149,7 +144,6 @@ const Watch = () => {
       console.log(error.response?.data);
     }
   }
-
 
   return (
     <div className="font-body-lg text-on-surface bg-surface h-screen overflow-y-auto">
@@ -349,7 +343,7 @@ const Watch = () => {
             <div className="flex flex-col gap-3">
               {
                 suggestedVideos.map((video) => (
-                  <div className="flex gap-3 group cursor-pointer">
+                  <div key={video._id} className="flex gap-3 group cursor-pointer">
                     <div className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
                       <img className="w-full h-full object-cover" alt="Motherboard" src={video.thumbnail} />
                       <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">{formatDuration(video.duration)}</span>

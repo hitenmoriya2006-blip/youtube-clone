@@ -12,6 +12,7 @@ import './index.css';
 import MainLayout from './layout/MainLayout';
 import AuthLayout from './layout/AuthLayout';
 
+
 function App() {
 
   const dispatch = useDispatch()
@@ -51,8 +52,8 @@ function App() {
           element:<Watch />
         },
         {
-          path:`/channel/:channelId`,
-          element:<Channel />
+          path:`/channel/:username`,
+          element:<Channel />,
         }
       ]
     },

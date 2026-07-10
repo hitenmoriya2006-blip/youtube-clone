@@ -122,7 +122,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         likesCount: {
           $size: '$totalLikes'
         },
-        isLiked:{
+        isLiked: {
           $in: [req.user?._id, "$totalLikes.likedBy"]
         }
       }
@@ -141,7 +141,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         subscribersCount: 1,
         isSubscribed: 1,
         likesCount: 1,
-        isLiked:1
+        isLiked: 1
       }
     }
   ])
@@ -438,4 +438,52 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     ))
 })
 
-export { publishVideo, getVideoById, getAllVideo, updateVideo, deleteVideo, togglePublishStatus }
+const getChannelVideos = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username?.trim()) {
+    throw new ApiError(400, "Username is missing!");
+  }
+
+  const userData = await userModel.findOne({
+    username: username.toLowerCase(),
+  });
+
+  if (!userData) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const allVideos = await videoModel.aggregate([
+    {
+      $match: {
+        owner: userData._id,
+        isPublished: true,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $project: {
+        thumbnail: 1,
+        title: 1,
+        description:1,
+        duration: 1,
+        views: 1,
+        createdAt: 1,
+      },
+    },
+  ]);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      allVideos,
+      "Videos fetched successfully"
+    )
+  );
+});
+
+export { publishVideo, getVideoById, getAllVideo, updateVideo, deleteVideo, togglePublishStatus, getChannelVideos }

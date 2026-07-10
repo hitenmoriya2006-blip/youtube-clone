@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from '../utils/ApiResponse.js'
 import { deleteFromCloudinary, uploadOnCloudinary } from "../services/storage.js"
 import { userModel } from "../models/user.model.js"
+import { videoModel } from "../models/video.model.js"
 import cookieParser from "cookie-parser"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
@@ -414,9 +415,6 @@ const getChannelDetails = asyncHandler(async (req, res) => {
          }
       }
    ])
-
-   console.log(`channel data ${channel}`);
-   
 
    if (channel?.length === 0) {
       throw new ApiError(404, 'channel doesnot exists')
