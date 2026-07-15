@@ -1,38 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
-import { logout } from '../features/auth/authSlice';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 
 const Header = ({ onMenuClick }) => {
 
   const user = useSelector((state) => state.auth.user)
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-  }, [])
-
-  const logoutAccount = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/api/v1/users/logout',
-        {},
-        {
-          withCredentials: true,
-        }
-      )
-
-      if (response) {
-        dispatch(logout)
-        navigate('/login')
-      }
-    } catch (error) {
-      console.log(error.response?.status);
-      console.log(error.response?.data);
-    }
-  }
-
+  const  navigate = useNavigate()
+  
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[56px] bg-background flex items-center justify-between px-4">
       {/* Left: Menu & Logo */}
@@ -40,7 +16,7 @@ const Header = ({ onMenuClick }) => {
         <button onClick={onMenuClick} className="w-10 h-10 rounded-full bg-transparent border-none text-on-surface flex items-center justify-center transition-colors hover:bg-surface-container-highest">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
         </button>
-        <div className="flex items-center gap-0.5 cursor-pointer">
+        <div onClick={() =>  navigate('/')}  className="flex items-center gap-0.5 cursor-pointer">
           <span className="material-symbols-outlined text-[28px] text-[#ff0000]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
           <span className="font-headline-lg text-headline-lg tracking-[-0.5px] text-on-surface">YouTube</span>
         </div>
@@ -53,7 +29,7 @@ const Header = ({ onMenuClick }) => {
             <input className="w-full bg-transparent border-none outline-none text-on-surface text-[16px] font-body-md placeholder:text-on-surface-variant" placeholder="Search" type="text" />
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant cursor-pointer" style={{ fontVariationSettings: "'FILL' 0" }}>keyboard</span>
           </div>
-          <button className="bg-surface-container-highest border border-l-0 border-surface-variant rounded-r-full w-16 h-10 flex items-center justify-center text-on-surface shrink-0 transition-colors hover:bg-surface-variant">
+          <button onClick={() => navigate('/result')} className="bg-surface-container-highest border border-l-0 border-surface-variant rounded-r-full w-16 h-10 flex items-center justify-center text-on-surface shrink-0 transition-colors hover:bg-surface-variant">
             <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
           </button>
         </div>
@@ -71,16 +47,9 @@ const Header = ({ onMenuClick }) => {
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>notifications</span>
           <span className="absolute top-1.5 right-1 bg-primary-container text-white text-[10px] font-bold px-1 rounded-[10px] leading-[1.2] border-2 border-background">9+</span>
         </button>
-        <div className='flex gap-2 items-center'>
-          <p className='text-white font-light text-sm'>{user?.username}</p>
-          <button onClick={() => {
-            logoutAccount()
-          }} className='text-white font-medium hover:bg-gray-500 rounded-lg'>
-            logout
-          </button>
-        </div>
-        <button className="w-8 h-8 rounded-full overflow-hidden border-none bg-transparent cursor-pointer ml-2 transition-shadow hover:shadow-[0_0_0_1px_var(--tw-colors-surface-variant)]">
-          <img alt="User profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCB-BYTjCicNkO6w8Lott0M_kC5M0-T1uKDyPeC0piNocwqrPES2v9nc-ZODNWZyJTQKTrtLrjsmd8Vpr6UTXy4F4m2CTPmH0kLzN9wBndqn4-_o5ra0PI_O222F5r93KC9nv1uKGCVx8J5XnOssfLpiFyBqkKgP7AMXXfDoECP4GbSQ5Xrw7ah_bZUf5IEGZe1d5cNMp8qf40Us9ecEb85unRuiMGbOvQuBzAZjaxbuyFCPMkoFmk" />
+      
+        <button onClick={() => navigate('/Profile')} className="w-8 h-8 rounded-full overflow-hidden border-none bg-transparent cursor-pointer ml-2 transition-shadow hover:shadow-[0_0_0_1px_var(--tw-colors-surface-variant)]">
+          <img alt="User profile" className="w-full h-full object-cover" src={user?.avatar} />
         </button>
       </div>
     </header>

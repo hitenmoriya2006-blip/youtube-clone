@@ -30,11 +30,11 @@ router.route('/register').post(upload.fields([
 router.route('/login').post(loginUser)
 router.route('/logout').post(authMiddleware,logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
-router.route('/change-password').post(authMiddleware,changeCurrentPassword)
+router.route('/change-password').patch(authMiddleware,changeCurrentPassword)
 router.route('/current-user').get(authMiddleware,getCurrentUser)
 router.route('/update-account').patch(authMiddleware,updateAccountDetail)
 router.route('/avatar').patch(authMiddleware,upload.single('avatar'),updateAvatarImage)
-router.route('cover-image').patch(authMiddleware,upload.single('coverImage'),updateCoverImage)
+router.route('/cover-image').patch(authMiddleware,upload.single('coverImage'),updateCoverImage)
 router.route('/channel/:username').get(authMiddleware,getChannelDetails)
 router.route('/history').get(authMiddleware,getWatchHistory)
 

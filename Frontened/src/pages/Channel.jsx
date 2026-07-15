@@ -3,8 +3,6 @@ import { useParams,useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
 import axios from 'axios'
 
-
-
 const Channel = () => {
   const [activeTab, setActiveTab] = useState('Home');
   const [isSubscribed, setIsSubscribed] = useState(false);

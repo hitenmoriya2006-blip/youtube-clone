@@ -8,7 +8,7 @@ import { subscriptionModel } from '../models/subscription.model.js'
 import mongoose from "mongoose"
 
 const publishVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body
+  const { title, description, isPublished } = req.body
 
   if (!title || !description) {
     throw new ApiError(400, 'title & description is required')
@@ -36,7 +36,7 @@ const publishVideo = asyncHandler(async (req, res) => {
     title: title,
     description: description,
     owner: req.user?._id,
-    isPublished: true,
+    isPublished: isPublished || true,
     duration: videoFile.duration
   })
 
@@ -349,7 +349,7 @@ const updateVideo = asyncHandler(async (req, res) => {
       $set: updateFeild
     },
     {
-      returnDocument: 'after'
+      new:true
     }
   )
 

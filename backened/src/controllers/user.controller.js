@@ -90,9 +90,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
    const { login, password } = req.body;
 
-   
-   
-
    if (!login) {
       throw new ApiError(400, "Username or email is required");
    }
@@ -118,15 +115,23 @@ const loginUser = asyncHandler(async (req, res) => {
 
    const loggedinUser = await userModel.findById(user._id).select('-password -refreshToken')
 
-   const options = {
+   const accessOptions = {
       httpOnly: true,
-      secure: true
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
    }
 
+   const refreshOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 10 * 24 * 60 * 60 * 1000 // 10 days
+   }
    res
       .status(200)
-      .cookie('accessToken', accessToken, options)
-      .cookie('refreshToken', refreshToken, options)
+      .cookie('accessToken', accessToken, accessOptions)
+      .cookie('refreshToken', refreshToken, refreshOptions)
       .json(
          new ApiResponse(
             200,
@@ -183,20 +188,29 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
          throw new ApiError(401, "refresh token is expired or used")
       }
 
-      const { accessToken, newRefreshToken } = generateAccessandRefreshToken(user._id)
+      const { accessToken, refreshToken } = await generateAccessandRefreshToken(user._id)
 
-      const options = {
+      const accessOptions = {
          httpOnly: true,
-         secure: true
+         secure: process.env.NODE_ENV === "production",
+         sameSite: "lax",
+         maxAge: 24 * 60 * 60 * 1000 // 1 day
+      }
+
+      const refreshOptions = {
+         httpOnly: true,
+         secure: process.env.NODE_ENV === "production",
+         sameSite: "lax",
+         maxAge: 10 * 24 * 60 * 60 * 1000 // 10 days
       }
 
       res
          .status(200)
-         .cookie('accessToken', accessToken, options)
-         .cookie('refreshToken', refreshToken, options)
+         .cookie('accessToken', accessToken, accessOptions)
+         .cookie('refreshToken', refreshToken, refreshOptions)
          .json(
             new ApiResponse(200, {
-               accessToken, refreshToken: newRefreshToken
+               accessToken, refreshToken
             },
                "Access token refreshed"
             )
@@ -212,10 +226,14 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
    const { oldPassword, newPassword } = req.body
 
    const user = await userModel.findById(req.user?._id)
+
+   if (!user) {
+    throw new ApiError(404, "User not found");
+}
    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
    if (!isPasswordCorrect) {
-      throw new ApiError(400, 'invalid password')
+      throw new ApiError(400, 'incorrect password')
    }
 
    user.password = newPassword
@@ -246,18 +264,77 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetail = asyncHandler(async (req, res) => {
 
-   const { fullName, email } = req.body
+   const { fullName, email, username } = req.body
+
+   if (!fullName && !email && !username) {
+      throw new ApiError(400, "At least one field is required");
+   }
+
+   let trimmedName;
+   let trimmedEmail;
+   let trimmedUsername;
+
+   if (fullName) trimmedName = fullName.trim()
+   if (email) trimmedEmail = email.trim()
+   if (username) trimmedUsername = username.trim().toLowerCase()
+
+   if (fullName && !trimmedName) {
+      throw new ApiError(400, "Full name cannot be empty");
+   }
+
+   if (email && !trimmedEmail) {
+      throw new ApiError(400, "Email cannot be empty");
+   }
+
+   if (username && !trimmedUsername) {
+      throw new ApiError(400, "Username cannot be empty");
+   }
+
+   const emailRegex = /^\S+@\S+\.\S+$/;
+
+   if (email && !emailRegex.test(trimmedEmail)) {
+      throw new ApiError(400, "Invalid email");
+   }
+
+  if (username) {
+   const existingUser = await userModel.findOne({
+      username: trimmedUsername
+   });
+
+   if (
+      existingUser &&
+      existingUser._id.toString() !== req.user._id.toString()
+   ) {
+      throw new ApiError(409, "Username already exists");
+   }
+}
+
+  if (email) {
+   const existingEmail = await userModel.findOne({
+      email: trimmedEmail
+   });
+
+   if (
+      existingEmail &&
+      existingEmail._id.toString() !== req.user._id.toString()
+   ) {
+      throw new ApiError(409, "Email already exists");
+   }
+}
+
+   const updateFields = {}
+
+   if (fullName) updateFields.fullName = trimmedName
+   if (email) updateFields.email = trimmedEmail
+   if (username) updateFields.username = trimmedUsername
 
    const user = await userModel.findByIdAndUpdate(
       req.user?._id,
       {
-         $set: {
-            fullName,
-            email
-         }
+         $set: updateFields
       },
       {
-         returnDocument: 'after'
+         new: true
       }
    ).select('-password')
 
@@ -302,7 +379,7 @@ const updateAvatarImage = asyncHandler(async (req, res) => {
          }
       },
       {
-         returnDocument: 'after'
+         new: true
       }
    ).select('-password')
 
@@ -331,6 +408,8 @@ const updateCoverImage = asyncHandler(async (req, res) => {
    if (!coverImage?.url) {
       throw new ApiError(500, 'something went wrong')
    }
+
+   await deleteFromCloudinary(user?.coverImagePublicID)
 
    user = await userModel.findByIdAndUpdate(
       req.user?._id,

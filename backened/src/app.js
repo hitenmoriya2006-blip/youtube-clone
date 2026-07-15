@@ -1,6 +1,7 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import { errorHandler } from './middlewares/error.middleware.js'
 import userRoutes from './routes/user.route.js'
 import videoRoutes from './routes/video.route.js'
 import subscriptionRoute from './routes/subscription.route.js'
@@ -30,5 +31,7 @@ app.use('/api/v1/like',likeRoute)
 app.use('/api/v1/comment',commmentRoute)
 app.use('/api/v1/dashboard',dashboardRoute)
 app.use('/api/v1/playlist',playlistRoutes)
+
+app.use(errorHandler);
 
 export default app 

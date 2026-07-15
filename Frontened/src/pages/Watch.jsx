@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate, data } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
 
 const Watch = () => {
@@ -9,6 +9,7 @@ const Watch = () => {
   const [isDisliked, setIsDisliked] = useState(false);
   const [allComments, setAllComments] = useState([])
   const [video, setvideo] = useState()
+  const [userInfo, setuserInfo] = useState(null)
   const [suggestedVideos, setsuggestedVideos] = useState([])
   const [comment, setComment] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -109,8 +110,23 @@ const Watch = () => {
       }
     }
 
+    const userInfoFetched = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/v1/users/current-user',
+          {
+            withCredentials:true
+          }
+        )
+        if(response) setuserInfo(response.data.data.user)
+      } catch (error) {
+        console.log(error.response?.status);
+        console.log(error.response?.data);
+      }
+    }
+
     getAllComments()
     fetchSuggestedVideos()
+    userInfoFetched()
   }, [])
 
   const formatDuration = (duration) => {
@@ -171,12 +187,11 @@ const Watch = () => {
                   <Link to={`/channel/${video?.owner?.username}`}>  <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container">
                     <img className="w-full h-full object-cover" alt="Nexus Tech Lab Logo" src={video?.owner?.avatar} />
                   </div></Link>
-                  <Link to={'/channel'}>
                     <div>
-                      <h3 className="font-headline-md text-headline-md">{video?.owner?.fullName}</h3>
+                    <Link to={`/channel/${video?.owner?.username}`}><h3 className="font-headline-md text-headline-md">{video?.owner?.fullName}</h3></Link>
                       <p className="text-label-sm text-on-surface-variant">{video?.subscribersCount} subscribers</p>
                     </div>
-                  </Link>
+                  
                   <button
                     onClick={toggleSubscription}
                     className={`ml-4 px-4 py-2 rounded-full font-bold text-label-lg transition-all active:scale-95 ${isSubscribed
@@ -231,7 +246,7 @@ const Watch = () => {
               <div className="flex gap-2 text-label-lg font-bold mb-1">
                 <span>{video?.views} views</span>
                 <span>{video && timeAgo(video.createdAt)}</span>
-                <span className="text-on-surface-variant">#quantumtech #pcbuilding #nexuslab</span>
+                <span className="text-on-surface-variant"></span>
               </div>
               <div className="text-body-md leading-relaxed">
                 {video?.description}
@@ -253,8 +268,7 @@ const Watch = () => {
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest flex-shrink-0">
                   <img
                     className="w-full h-full object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXkFOYBPyDPAo3842MWjSbfLMfiThYD1x92WpkYJcS9NNEkxyrA5z-W1WCpLowWRa4HBFo2kH6y9wIlzytAVZVS3Q3QjUXiyv2-1m8trNj4-5LvJ-_z2BJ_b_Y7146H4B70z5m89ryp_pzYN7lmlUOyj5xpddnS2a8OZyokamO6bEtNZcZCNzsp4VBHpQbE-z0Beji4lgn2FXj8IZwcz6r7v-fT-0-MeHVUpCkd5EAWf4RoZRKPA8"
-                    alt="User"
+                    src={userInfo?.avatar}
                   />
                 </div>
 
@@ -343,7 +357,8 @@ const Watch = () => {
             <div className="flex flex-col gap-3">
               {
                 suggestedVideos.map((video) => (
-                  <div key={video._id} className="flex gap-3 group cursor-pointer">
+                 <Link to={`/watch/${video._id}`} key={video._id}>
+                     <div className="flex gap-3 group cursor-pointer">
                     <div className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
                       <img className="w-full h-full object-cover" alt="Motherboard" src={video.thumbnail} />
                       <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">{formatDuration(video.duration)}</span>
@@ -354,6 +369,7 @@ const Watch = () => {
                       <p className="text-[12px] text-on-surface-variant">{video.views} views • {timeAgo(video.createdAt)}</p>
                     </div>
                   </div>
+                 </Link>
                 ))
               }
             </div>

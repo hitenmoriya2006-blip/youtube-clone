@@ -1,10 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ isOpen }) => {
+
+ const navigate = useNavigate()
+
   if (!isOpen) {
     return (
-      <nav className="fixed left-0 top-[56px] w-[72px] h-[calc(100vh-56px)] bg-background flex flex-col items-center py-1 gap-1 overflow-y-auto overflow-x-hidden z-50 hidden lg:flex hide-scrollbar">
-        <a className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface bg-surface-container-highest transition-colors font-medium" href="#">
+      <nav className="fixed left-0 top-[56px] w-[72px]  h-[calc(100vh-56px)] bg-background flex flex-col items-center py-1 gap-1 overflow-y-auto overflow-x-hidden z-50 hidden lg:flex hide-scrollbar">
+        <a onClick={()  => navigate('/')} className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface bg-surface-container-highest transition-colors font-medium">
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
           <span className="text-[10px] scale-90 whitespace-nowrap">Home</span>
         </a>

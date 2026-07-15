@@ -5,12 +5,17 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Watch from './pages/Watch';
 import Channel from './pages/Channel';
+import UploadVideo from './pages/UploadVideo';
+import EditVideoDetails from './pages/EditVideoDetails';
 import { useDispatch } from 'react-redux';
 import { login } from './features/auth/authSlice';
 import axios from 'axios'
 import './index.css';
 import MainLayout from './layout/MainLayout';
 import AuthLayout from './layout/AuthLayout';
+import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
+import SearchResults from './pages/SearchResults'
 
 
 function App() {
@@ -54,6 +59,26 @@ function App() {
         {
           path:`/channel/:username`,
           element:<Channel />,
+        },
+        {
+          path:'/profile',
+          element:<Profile />
+        },
+        {
+          path:'/edit-profile',
+          element:<EditProfile />
+        },
+        {
+          path:'/upload',
+          element:<UploadVideo />
+        },
+        {
+          path: '/edit-video',
+          element: <EditVideoDetails />
+        },
+        {
+          path:'/result',
+          element: <SearchResults />
         }
       ]
     },
@@ -78,12 +103,3 @@ function App() {
 }
 
 export default App;
-
-//  <BrowserRouter>
-//       <Routes>
-//         <Route path="/" element={<Home />} />
-//         <Route path="/login" element={<Login />} />
-//         <Route path="/signup" element={<Signup />} />
-//         <Route path="/watch/:videoId" element={<Watch />} />
-//       </Routes>
-//     </BrowserRouter>
