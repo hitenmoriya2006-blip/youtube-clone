@@ -16,6 +16,8 @@ import AuthLayout from './layout/AuthLayout';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import SearchResults from './pages/SearchResults'
+import Playlists from './pages/Playlists';
+import PlaylistDetails from './pages/PlaylistDetails'
 
 
 function App() {
@@ -79,6 +81,14 @@ function App() {
         {
           path:'/result',
           element: <SearchResults />
+        },
+        {
+          path:'/playlist',
+          element:<Playlists />
+        },,
+        {
+          path:'/playlists/playlistId',
+          element:<PlaylistDetails />
         }
       ]
     },

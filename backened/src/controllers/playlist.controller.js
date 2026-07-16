@@ -36,7 +36,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
     const playlist = await playlistModel.create({
         name: trimmedName,
-        description: description,
+        description: description ,
         owner: userId,
         videos: videoId ? [
             new mongoose.Types.ObjectId(videoId)
