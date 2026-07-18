@@ -87,7 +87,7 @@ function App() {
           element:<Playlists />
         },,
         {
-          path:'/playlists/playlistId',
+          path:'/playlists/:playlistId',
           element:<PlaylistDetails />
         }
       ]

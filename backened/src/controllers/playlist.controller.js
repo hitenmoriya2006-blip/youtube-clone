@@ -6,21 +6,18 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
-    const { name, description } = req.body
+    const { title, description } = req.body
     const userId = req.user?._id
     const { videoId } = req.params
 
-    console.log(name);
-
-
-    if (!name) {
-        throw new ApiError(400, 'name is required')
+    if (!title) {
+        throw new ApiError(400, 'title is required')
     }
 
-    const trimmedName = name.trim()
+    const trimmedTitle = title.trim()
 
-    if (trimmedName === '') {
-        throw new ApiError(400, 'invalid name')
+    if (trimmedTitle === '') {
+        throw new ApiError(400, 'invalid title')
     }
 
 
@@ -35,8 +32,8 @@ const createPlaylist = asyncHandler(async (req, res) => {
     }
 
     const playlist = await playlistModel.create({
-        name: trimmedName,
-        description: description ,
+        title: trimmedTitle,
+        description: description,
         owner: userId,
         videos: videoId ? [
             new mongoose.Types.ObjectId(videoId)
@@ -65,6 +62,9 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
     const playList = await playlistModel.find({
         owner: userId
+    }).populate({
+        path:'videos',
+        select:'thumbnail'
     })
 
     console.log(playList);
@@ -102,12 +102,16 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 
     const playlist = await playlistModel.findById(playlistId).populate({
         path: 'videos',
-        select: "title thumbnail duration views owner",
+        select: "title thumbnail duration views owner createdAt ",
         populate: {
             path: "owner",
             select: "fullName username avatar"
         }
     })
+        .populate({
+            path: "owner",
+            select: "fullName username avatar"
+        })
 
     if (!playlist) {
         throw new ApiError(404, 'playlist not found')
@@ -269,7 +273,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 })
 
 const updatePlaylist = asyncHandler(async (req, res) => {
-    const { name, description } = req.body
+    const { title, description } = req.body
     const { playlistId } = req.params
     const userId = req.user?._id
 
@@ -277,15 +281,15 @@ const updatePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(403, 'unauthorized request')
     }
 
-    if (!(name || description)) {
-        throw new ApiError(400, 'name or description is required')
+    if (!(title || description)) {
+        throw new ApiError(400, 'title or description is required')
     }
 
-    const trimmedName = name?.trim();
+    const trimmedTitle = title?.trim();
     const trimmedDescription = description?.trim();
 
-    if (name && trimmedName === '') {
-        throw new ApiError(400, 'invalid name')
+    if (title && trimmedTitle === '') {
+        throw new ApiError(400, 'invalid title')
     }
 
     if (description && trimmedDescription === '') {
@@ -294,8 +298,8 @@ const updatePlaylist = asyncHandler(async (req, res) => {
 
     const updateFields = {}
 
-    if (trimmedName) {
-        updateFields.name = trimmedName
+    if (trimmedTitle) {
+        updateFields.title = trimmedTitle
     }
 
     if (trimmedDescription) {

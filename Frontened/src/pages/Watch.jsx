@@ -13,7 +13,15 @@ const Watch = () => {
   const [suggestedVideos, setsuggestedVideos] = useState([])
   const [comment, setComment] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const [playlist, setPlaylist] = useState([])
+  const navigate = useNavigate()
 
+  // Save popup state
+  const [isSavePopupOpen, setIsSavePopupOpen] = useState(false);
+  const mockPlaylistsForSave = [
+    { id: 1, name: 'Watch later', privacy: 'Private', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800' },
+    { id: 2, name: 'Tailwindd project', privacy: 'Private', thumbnail: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=800' },
+  ];
 
   const { videoId } = useParams()
 
@@ -114,10 +122,26 @@ const Watch = () => {
       try {
         const response = await axios.get('http://localhost:3000/api/v1/users/current-user',
           {
-            withCredentials:true
+            withCredentials: true
           }
         )
-        if(response) setuserInfo(response.data.data.user)
+        if (response) setuserInfo(response.data.data.user)
+      } catch (error) {
+        console.log(error.response?.status);
+        console.log(error.response?.data);
+      }
+    }
+
+    const fetchedPlaylist = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/v1/playlist/user',
+          {
+            withCredentials: true
+          }
+        )
+        if (response) setPlaylist(response.data.data)
+          console.log(response);
+          
       } catch (error) {
         console.log(error.response?.status);
         console.log(error.response?.data);
@@ -127,6 +151,7 @@ const Watch = () => {
     getAllComments()
     fetchSuggestedVideos()
     userInfoFetched()
+    fetchedPlaylist()
   }, [])
 
   const formatDuration = (duration) => {
@@ -161,6 +186,22 @@ const Watch = () => {
     }
   }
 
+  const addVideoTOPlayList = async (playlistId) => {
+    try {
+      const response = await axios.patch(`http://localhost:3000/api/v1/playlist/add/${videoId}/${playlistId}`,
+       {},
+       {
+        withCredentials:true
+       }
+      )
+      if (response) alert('Video added to Playlist')
+        setIsSavePopupOpen(false)
+    } catch (error) {
+      console.log(error.response?.status);
+      console.log(error.response?.data);
+    }
+  }
+
   return (
     <div className="font-body-lg text-on-surface bg-surface h-screen overflow-y-auto">
 
@@ -168,7 +209,7 @@ const Watch = () => {
 
       {/* Main Content Grid */}
       <main className="pt-4  min-h-screen">
-        <div className="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
+        <div className="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-6 p-4 lg:p-4">
           {/* Video Section */}
           <div className="flex-1 lg:max-w-[calc(100%-400px)]">
             {/* Video Player */}
@@ -187,11 +228,11 @@ const Watch = () => {
                   <Link to={`/channel/${video?.owner?.username}`}>  <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container">
                     <img className="w-full h-full object-cover" alt="Nexus Tech Lab Logo" src={video?.owner?.avatar} />
                   </div></Link>
-                    <div>
+                  <div>
                     <Link to={`/channel/${video?.owner?.username}`}><h3 className="font-headline-md text-headline-md">{video?.owner?.fullName}</h3></Link>
-                      <p className="text-label-sm text-on-surface-variant">{video?.subscribersCount} subscribers</p>
-                    </div>
-                  
+                    <p className="text-label-sm text-on-surface-variant">{video?.subscribersCount} subscribers</p>
+                  </div>
+
                   <button
                     onClick={toggleSubscription}
                     className={`ml-4 px-4 py-2 rounded-full font-bold text-label-lg transition-all active:scale-95 ${isSubscribed
@@ -234,8 +275,12 @@ const Watch = () => {
                     <span className="material-symbols-outlined">download</span>
                     <span className="text-label-lg font-bold">Download</span>
                   </button>
-                  <button className="p-2 bg-surface-container-high rounded-full hover:bg-surface-variant transition-colors active:scale-95 shrink-0">
-                    <span className="material-symbols-outlined">more_horiz</span>
+                  <button
+                    onClick={() => setIsSavePopupOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
+                  >
+                    <span className="material-symbols-outlined">bookmark_border</span>
+                    <span className="text-label-lg font-bold">Save</span>
                   </button>
                 </div>
               </div>
@@ -357,19 +402,19 @@ const Watch = () => {
             <div className="flex flex-col gap-3">
               {
                 suggestedVideos.map((video) => (
-                 <Link to={`/watch/${video._id}`} key={video._id}>
-                     <div className="flex gap-3 group cursor-pointer">
-                    <div className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
-                      <img className="w-full h-full object-cover" alt="Motherboard" src={video.thumbnail} />
-                      <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">{formatDuration(video.duration)}</span>
+                  <Link to={`/watch/${video._id}`} key={video._id}>
+                    <div className="flex gap-3 group cursor-pointer">
+                      <div className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+                        <img className="w-full h-full object-cover" alt="Motherboard" src={video.thumbnail} />
+                        <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">{formatDuration(video.duration)}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <h4 className="text-label-lg font-bold leading-tight line-clamp-2 group-hover:text-primary-container transition-colors">{video.title}</h4>
+                        <p className="text-[12px] text-on-surface-variant hover:text-on-surface">{video.owner?.fullName}</p>
+                        <p className="text-[12px] text-on-surface-variant">{video.views} views • {timeAgo(video.createdAt)}</p>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <h4 className="text-label-lg font-bold leading-tight line-clamp-2 group-hover:text-primary-container transition-colors">{video.title}</h4>
-                      <p className="text-[12px] text-on-surface-variant hover:text-on-surface">{video.owner?.fullName}</p>
-                      <p className="text-[12px] text-on-surface-variant">{video.views} views • {timeAgo(video.createdAt)}</p>
-                    </div>
-                  </div>
-                 </Link>
+                  </Link>
                 ))
               }
             </div>
@@ -396,39 +441,54 @@ const Watch = () => {
           <span className="text-[9px] font-label-sm">Library</span>
         </div>
       </nav>
+
+      {/* Save to Playlist Popup */}
+      {isSavePopupOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+          <div className="relative w-full max-w-[360px] bg-surface-container-high rounded-xl overflow-hidden shadow-2xl border border-white/5 mx-4">
+
+            <div className="px-5 py-4 flex items-center justify-between border-b border-outline-variant/30">
+              <h2 className="font-headline-md text-headline-md text-on-surface">Save to...</h2>
+              <button
+                className="p-2 rounded-full hover:bg-surface-container-highest transition-colors"
+                onClick={() => setIsSavePopupOpen(false)}
+              >
+                <span className="material-symbols-outlined text-on-surface-variant">close</span>
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+              {playlist.map(pl => (
+                <div onClick={() => addVideoTOPlayList(pl._id)} key={pl?._id} className="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-highest cursor-pointer transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-10 bg-surface-container rounded overflow-hidden">
+                      <img src={pl.videos?.[0]?.thumbnail} alt={pl.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <div className="text-label-lg font-bold text-on-surface">{pl.title}</div>
+                      <div className="text-[12px] text-on-surface-variant">{pl.privacy}</div>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface">
+                    bookmark_border
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-4 py-3 border-t border-outline-variant/30 bg-surface-container-highest/50">
+              <button onClick={() => navigate('/playlist')} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-surface-container-low hover:bg-surface-variant transition-colors text-on-surface font-label-lg border border-outline-variant/30">
+                <span className="material-symbols-outlined">add</span>
+                New playlist
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
 
 export default Watch;
-
-
-
-
-//  <div className="relative aspect-video bg-black rounded-xl overflow-hidden group cursor-pointer shadow-2xl">
-//             <img className="w-full h-full object-cover opacity-80" alt="Video Player" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXoXsaRy-3SMI0FEMwlzC81U97IUBWaWSv1dbRIPwGlUEce5Zy4cIW4KdrL8WfxGlTwVIFLrjWLczElqZInhImJYnMqDeOrHjiI6PJ2RCX90ZUPS_qE-WK3N7P58jmbLWp4kLpjqNVBQVtzaCFiSQujnX2KU84QhM8diiRWiGaez24AfAaNgH68PC7vhx_wgfarBM7EYtl-3076bbPu7r6_uA3tTjDVw0N78PraZGFtRtwrAIXBgg" />
-//             <div className="absolute inset-0 flex items-center justify-center">
-//               <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity scale-125">
-//                 <span className="material-symbols-outlined text-white text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-//               </div>
-//             </div>
-//             {/* Mock Player Controls Overlay */}
-//             <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
-//               <div className="h-1 bg-white/30 rounded-full mb-4 overflow-hidden">
-//                 <div className="h-full bg-primary-container w-1/3"></div>
-//               </div>
-//               <div className="flex justify-between items-center text-white">
-//                 <div className="flex items-center gap-4">
-//                   <span className="material-symbols-outlined cursor-pointer">play_arrow</span>
-//                   <span className="material-symbols-outlined cursor-pointer">skip_next</span>
-//                   <span className="material-symbols-outlined cursor-pointer">volume_up</span>
-//                   <span className="text-label-sm">12:34 / 45:10</span>
-//                 </div>
-//                 <div className="flex items-center gap-4">
-//                   <span className="material-symbols-outlined cursor-pointer">settings</span>
-//                   <span className="material-symbols-outlined cursor-pointer">picture_in_picture_alt</span>
-//                   <span className="material-symbols-outlined cursor-pointer">fullscreen</span>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
