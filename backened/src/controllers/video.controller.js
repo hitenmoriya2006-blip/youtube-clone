@@ -51,9 +51,14 @@ const publishVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params
+  const userId = req.user?._id
 
   if (!videoId) {
     throw new ApiError(400, 'video ID is required')
+  }
+
+  if (!userId) {
+    throw new ApiError(400, 'userId is required')
   }
 
   const validVideoID = mongoose.Types.ObjectId.isValid(videoId)
@@ -156,7 +161,32 @@ const getVideoById = asyncHandler(async (req, res) => {
     }
   })
 
-  
+  const videoIdObject = new mongoose.Types.ObjectId(videoId)
+
+  await userModel.findByIdAndUpdate(userId, {
+    $pull: {
+      watchHistory: videoIdObject
+
+    },
+  },
+    {
+      new: true
+    })
+
+  await userModel.findByIdAndUpdate(userId,
+    {
+      $push: {
+        watchHistory: {
+          $each: [videoIdObject],
+          $position: 0
+        }
+      }
+    },
+    {
+      new: true
+    }
+  )
+
 
   return res
     .status(200)
@@ -351,7 +381,7 @@ const updateVideo = asyncHandler(async (req, res) => {
       $set: updateFeild
     },
     {
-      new:true
+      new: true
     }
   )
 
@@ -471,7 +501,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
       $project: {
         thumbnail: 1,
         title: 1,
-        description:1,
+        description: 1,
         duration: 1,
         views: 1,
         createdAt: 1,

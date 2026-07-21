@@ -9,7 +9,9 @@ import {userRegistration,
         updateCoverImage,
         getChannelDetails,
         getWatchHistory,
-        refreshAccessToken
+        refreshAccessToken,
+        removeVideoFromHistory,
+        clearWatchHistory
       } from '../controllers/user.controller.js'
 import {upload} from '../middlewares/multer.middleware.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
@@ -37,5 +39,7 @@ router.route('/avatar').patch(authMiddleware,upload.single('avatar'),updateAvata
 router.route('/cover-image').patch(authMiddleware,upload.single('coverImage'),updateCoverImage)
 router.route('/channel/:username').get(authMiddleware,getChannelDetails)
 router.route('/history').get(authMiddleware,getWatchHistory)
+router.route('/history/remove/:videoId').delete(authMiddleware,removeVideoFromHistory)
+router.route('/history/clear').delete(authMiddleware,clearWatchHistory)
 
 export default router

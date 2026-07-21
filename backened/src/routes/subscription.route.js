@@ -5,10 +5,10 @@ import {toggleSubscription,
         getSubscribedChannels
 } from '../controllers/subscription.controller.js'
 
-const router = express.Router()
+const  router = express.Router()
 
 router.route('/toggleSub/:channelId').patch(authMiddleware,toggleSubscription)
 router.route('/c/subscribers/:channelId').get(getUserChannelSubscribers)
-router.route('/c/subscribed/').get(authMiddleware,getSubscribedChannels)
+router.route('/c/subscribed').get(authMiddleware,getSubscribedChannels)
 
 export default router

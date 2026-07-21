@@ -31,7 +31,7 @@ const VideoCard = ({ _id,title, views, duration, avatar, thumbnail, isLive, owne
   };
 
   return (
-    <div onClick={() =>{navigate(`/watch/${_id}`)}} className="flex flex-col gap-3 cursor-pointer rounded-xl p-2.5 transition-transform duration-300 hover:bg-surface-container-highest">
+    <div onClick={() =>{navigate(`/watch/${_id}`)}}  className="flex flex-col gap-3 cursor-pointer w-full rounded-xl p-2.5 transition-colors duration-300 hover:bg-surface-container-highest">
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-surface-container-highest">
         <img alt={title} className="w-full h-full object-cover " src={thumbnail} />
         {isLive ? (

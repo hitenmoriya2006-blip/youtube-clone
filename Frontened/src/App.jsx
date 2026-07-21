@@ -18,6 +18,7 @@ import EditProfile from './pages/EditProfile';
 import SearchResults from './pages/SearchResults'
 import Playlists from './pages/Playlists';
 import PlaylistDetails from './pages/PlaylistDetails'
+import WatchHistory from './pages/WatchHistory'
 
 
 function App() {
@@ -89,6 +90,10 @@ function App() {
         {
           path:'/playlists/:playlistId',
           element:<PlaylistDetails />
+        },
+        {
+          path:'/history',
+          element: <WatchHistory />
         }
       ]
     },

@@ -86,7 +86,6 @@ const userRegistration = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-   console.log(req.body);
 
    const { login, password } = req.body;
 
@@ -228,8 +227,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
    const user = await userModel.findById(req.user?._id)
 
    if (!user) {
-    throw new ApiError(404, "User not found");
-}
+      throw new ApiError(404, "User not found");
+   }
    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
    if (!isPasswordCorrect) {
@@ -296,31 +295,31 @@ const updateAccountDetail = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Invalid email");
    }
 
-  if (username) {
-   const existingUser = await userModel.findOne({
-      username: trimmedUsername
-   });
+   if (username) {
+      const existingUser = await userModel.findOne({
+         username: trimmedUsername
+      });
 
-   if (
-      existingUser &&
-      existingUser._id.toString() !== req.user._id.toString()
-   ) {
-      throw new ApiError(409, "Username already exists");
+      if (
+         existingUser &&
+         existingUser._id.toString() !== req.user._id.toString()
+      ) {
+         throw new ApiError(409, "Username already exists");
+      }
    }
-}
 
-  if (email) {
-   const existingEmail = await userModel.findOne({
-      email: trimmedEmail
-   });
+   if (email) {
+      const existingEmail = await userModel.findOne({
+         email: trimmedEmail
+      });
 
-   if (
-      existingEmail &&
-      existingEmail._id.toString() !== req.user._id.toString()
-   ) {
-      throw new ApiError(409, "Email already exists");
+      if (
+         existingEmail &&
+         existingEmail._id.toString() !== req.user._id.toString()
+      ) {
+         throw new ApiError(409, "Email already exists");
+      }
    }
-}
 
    const updateFields = {}
 
@@ -334,7 +333,7 @@ const updateAccountDetail = asyncHandler(async (req, res) => {
          $set: updateFields
       },
       {
-         new: true
+         returnDocument: "after"
       }
    ).select('-password')
 
@@ -379,7 +378,7 @@ const updateAvatarImage = asyncHandler(async (req, res) => {
          }
       },
       {
-         new: true
+         returnDocument: "after"
       }
    ).select('-password')
 
@@ -512,9 +511,17 @@ const getWatchHistory = asyncHandler(async (req, res) => {
    const user = await userModel.aggregate([
       {
          $match: {
-            _id: new mongoose.Types.ObjectId(req.user?._id)
+            _id: new mongoose.Types.ObjectId(req.user._id)
          }
       },
+
+      // Save the original array of ObjectIds
+      {
+         $addFields: {
+            watchHistoryIds: "$watchHistory"
+         }
+      },
+
       {
          $lookup: {
             from: "videos",
@@ -548,8 +555,52 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                }
             ]
          }
+      },
+
+      // Add the original position of each video
+      {
+         $addFields: {
+            watchHistory: {
+               $map: {
+                  input: "$watchHistory",
+                  as: "video",
+                  in: {
+                     $mergeObjects: [
+                        "$$video",
+                        {
+                           order: {
+                              $indexOfArray: ["$watchHistoryIds", "$$video._id"]
+                           }
+                        }
+                     ]
+                  }
+               }
+            }
+         }
+      },
+
+      // Sort according to the original array order
+      {
+         $addFields: {
+            watchHistory: {
+               $sortArray: {
+                  input: "$watchHistory",
+                  sortBy: {
+                     order: 1
+                  }
+               }
+            }
+         }
+      },
+
+      {
+         $project: {
+            watchHistoryIds: 0,
+            "watchHistory.order": 0
+         }
       }
-   ])
+   ]);
+
 
    return res.status(200).json(
       new ApiResponse(
@@ -558,6 +609,67 @@ const getWatchHistory = asyncHandler(async (req, res) => {
          "Watch history fetched successfully"
       )
    )
+})
+
+const removeVideoFromHistory = asyncHandler(async (req, res) => {
+   const { videoId } = req.params
+   const userId = req.user?._id
+
+   if (!videoId) {
+      throw new ApiError(400, 'video id is required')
+   }
+
+   if (!(mongoose.Types.ObjectId.isValid(videoId))) {
+      throw new ApiError(400, 'invalid video id')
+   }
+
+   const updatedHistory = await userModel.findByIdAndUpdate(userId, {
+      $pull: {
+         watchHistory: new mongoose.Types.ObjectId(videoId)
+      }
+   },
+      {
+         returnDocument: "after"
+      })
+
+   return res
+      .status(200)
+      .json(new ApiResponse(
+         200,
+         {},
+         'Video removed successfully'
+      ))
+})
+
+const clearWatchHistory = asyncHandler(async (req, res) => {
+   const userId = req.user?._id
+
+   if (!userId) {
+      throw new ApiError(400, 'user id is required')
+   }
+
+   const clearedHistory = await userModel.findByIdAndUpdate(userId,
+      {
+         $set: {
+            watchHistory: []
+         }
+      },
+      {
+         returnDocument: "after"
+      }
+   )
+
+   if (clearedHistory === null) {
+      throw new ApiError(400, 'something wemt wrong')
+   }
+
+   return res
+      .status(200)
+      .json(new ApiResponse(
+         200,
+         {},
+         'Watch History has been cleaed'
+      ))
 })
 
 export {
@@ -571,5 +683,7 @@ export {
    updateAvatarImage,
    updateCoverImage,
    getChannelDetails,
-   getWatchHistory
+   getWatchHistory,
+   removeVideoFromHistory,
+   clearWatchHistory
 }

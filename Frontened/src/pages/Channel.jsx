@@ -49,7 +49,7 @@ const Channel = () => {
     }
     fetchChannelData()
     fetchVideos()
-  }, [])
+  }, [username])
 
   const toggleSubscription = async () => {
     try {
