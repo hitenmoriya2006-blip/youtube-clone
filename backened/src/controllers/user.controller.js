@@ -263,19 +263,21 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetail = asyncHandler(async (req, res) => {
 
-   const { fullName, email, username } = req.body
+   const { fullName, email, username, description } = req.body
 
-   if (!fullName && !email && !username) {
+   if (!fullName && !email && !username && !description) {
       throw new ApiError(400, "At least one field is required");
    }
 
    let trimmedName;
    let trimmedEmail;
    let trimmedUsername;
+   let trimmedDescription;
 
    if (fullName) trimmedName = fullName.trim()
    if (email) trimmedEmail = email.trim()
    if (username) trimmedUsername = username.trim().toLowerCase()
+   if (description) trimmedDescription = description.trim()
 
    if (fullName && !trimmedName) {
       throw new ApiError(400, "Full name cannot be empty");
@@ -286,6 +288,10 @@ const updateAccountDetail = asyncHandler(async (req, res) => {
    }
 
    if (username && !trimmedUsername) {
+      throw new ApiError(400, "Username cannot be empty");
+   }
+
+   if (description && !trimmedDescription) {
       throw new ApiError(400, "Username cannot be empty");
    }
 
@@ -326,6 +332,7 @@ const updateAccountDetail = asyncHandler(async (req, res) => {
    if (fullName) updateFields.fullName = trimmedName
    if (email) updateFields.email = trimmedEmail
    if (username) updateFields.username = trimmedUsername
+   if(description) updateFields.description = trimmedDescription
 
    const user = await userModel.findByIdAndUpdate(
       req.user?._id,

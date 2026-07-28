@@ -10,7 +10,6 @@ const EditProfile = () => {
 
     const { register, watch, reset, handleSubmit, formState: { errors, dirtyFields } } = useForm()
     const user = useSelector((state) => state.auth.user)
-    const bio = watch("bio") || "";
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -19,11 +18,12 @@ const EditProfile = () => {
             fullName: user?.fullName,
             username: user?.username,
             email: user?.email,
-            bio: user?.bio,
+            description: user?.description,
         });
     }, [user, reset]);
 
     const updateAccountDetail = async (data) => {
+        console.log(data);
         try {
             await axios.patch(
                 "http://localhost:3000/api/v1/users/update-account",
@@ -35,7 +35,7 @@ const EditProfile = () => {
                 fullName: "Full Name",
                 username: "Username",
                 email: "Email",
-                bio: "Bio",
+                description: "description",
             };
 
             const changedFields = Object.keys(dirtyFields);
@@ -324,17 +324,13 @@ const EditProfile = () => {
                             <label className="block text-sm text-zinc-400 mb-2">
                                 Channel bio
                             </label>
-
-                            <span className="text-sm text-zinc-400">
-                                {bio.length}/500
-                            </span>
                         </div>
 
                         <textarea
                             rows={8}
                             maxLength={500}
                             placeholder="Tell viewers about your channel..."
-                            {...register("bio")}
+                            {...register("description")}
                             className="
                             w-full
                             bg-zinc-800
@@ -345,9 +341,13 @@ const EditProfile = () => {
                             resize-none
                             outline-none
                             focus:border-red-500
-                            transition
-    "
+                            transition"
                         />
+                          {errors.description && (
+                                <p className="text-red-500 text-sm mt-2">
+                                    {errors.description.message}
+                                </p>
+                            )}
 
                         <p className="text-sm text-zinc-500 mt-3">
                             Share what your channel is about, what you create, and why people should subscribe.

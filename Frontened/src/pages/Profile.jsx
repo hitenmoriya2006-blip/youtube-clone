@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 
 const Profile = () => {
 
-    // const [user, setuser] = useState()
     const [channnelStats, setchannnelStats] = useState()
     const [channelVideos, setchannelVideos] = useState([])
     const [showPasswordModel, setshowPasswordModel] = useState(false)
@@ -22,22 +21,6 @@ const Profile = () => {
     
 
     useEffect(() => {
-        // const currentUserData = async () => {
-        //     try {
-        //         const response = await axios.get('http://localhost:3000/api/v1/users/current-user',
-        //             {
-        //                 withCredentials: true
-        //             }
-        //         )
-        //         if (response) {
-        //             setuser(response.data.data.user)
-        //         }
-        //     } catch (error) {
-        //         console.log(error.response?.status);
-        //         console.log(error.response?.data);
-        //     }
-        // }
-
         const channelStatsData = async () => {
             try {
                 const response = await axios.get('http://localhost:3000/api/v1/dashboard/c/stats',
@@ -70,7 +53,6 @@ const Profile = () => {
             }
         }
 
-        // currentUserData()
         channelStatsData()
         channelVideosData()
     }, [])
@@ -192,9 +174,7 @@ const Profile = () => {
                         </div>
 
                         <p className="mt-4 text-zinc-300 max-w-2xl">
-                            Full Stack Developer passionate about building
-                            scalable applications, sharing knowledge, and
-                            creating amazing web experiences.
+                            {user?.description ? user?.description : '' }
                         </p>
                     </div>
 
@@ -296,8 +276,7 @@ const Profile = () => {
                                 <div>
                                     <p className="text-zinc-500 text-sm">Bio</p>
                                     <p className="mt-1 max-w-xl">
-                                        Full Stack Developer passionate about
-                                        creating modern web applications.
+                                      {user?.description}
                                     </p>
                                 </div>
 
