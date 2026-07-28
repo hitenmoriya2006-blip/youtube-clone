@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import axios from 'axios'
-import {Link,useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm()
   const password = watch('password')
-  const navigate =  useNavigate()
+  const navigate = useNavigate()
 
   const createAccount = async (data) => {
     try {
@@ -31,6 +32,7 @@ const Signup = () => {
           withCredentials: true
         }
       )
+      if(response) toast.success("Account created successfully");
       navigate('/login')
       console.log(response.message);
       reset()
@@ -54,10 +56,10 @@ const Signup = () => {
           </div>
           <h2 className="font-display-lg text-display-lg mb-4 text-on-surface leading-tight">Create your account</h2>
           <p className="font-body-lg text-body-lg text-on-surface-variant">Continue to YouTube to watch your favorite creators, save playlists, and join the conversation.</p>
-          <div className="mt-12 overflow-hidden rounded-xl aspect-video glass-panel relative group">
+          {/* <div className="mt-12 overflow-hidden rounded-xl aspect-video glass-panel relative group">
             <div className="w-full h-full bg-cover bg-center opacity-60 group-hover:scale-105 transition-transform duration-700" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtVvRgWk9zvuyn4UU_AEfl7qx-pa0CFHntJjQ0wrOoQFxjvFTdB8H01EoLEQBz13RPlU_6-FIBg_quHnp_e3P65oRNwxRrhhW0ATHExagCaX2lszPcM5oV8gV2VA933qfl_-RXRLj1xOTAZOvoPnJIEUy89CsCKHCVaWV0jdmar49jjYJkK6T_HqC9ENerhWkL6yUdkJCYUniEM99_JZRXvAJhWYsh9HcodJfr0N1k9RsQpNLhwCw')" }}></div>
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
-          </div>
+          </div> */}
         </div>
 
         {/* Sign Up Card */}
@@ -97,7 +99,15 @@ const Signup = () => {
             <div className="relative group">
               <input className="peer w-full bg-surface-container-high border-outline/30 border rounded-lg px-4 pt-6 pb-2 focus:border-primary-container focus:ring-0 text-on-surface transition-all" id="first_name" name="first_name" placeholder=" " type="text"
                 {...register("fullName", {
-                  required: 'username is required'
+                  required: 'username is required',
+                  minLength: {
+                    value: 3,
+                    message: 'Name is to small'
+                  },
+                  maxLength: {
+                    value: 14,
+                    message: 'Name is too long'
+                  }
                 })}
               />
               {errors.fullName && (<span className=' text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm'>{errors.fullName.message}</span>)}
@@ -120,7 +130,11 @@ const Signup = () => {
               <div className="relative group">
                 <input className="peer w-full bg-surface-container-high border-outline/30 border rounded-lg px-4 pt-6 pb-2 focus:border-primary-container focus:ring-0 text-on-surface transition-all" id="email" name="email" placeholder=" " type="email"
                   {...register('email', {
-                    required: 'email is required'
+                    required: 'email is required',
+                    pattern: {
+                      value: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
+                      message: "Please enter a valid Gmail address",
+                    }
                   })}
                 />
                 {errors.email && (<span className=' text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm'>{errors.email.message}</span>)}

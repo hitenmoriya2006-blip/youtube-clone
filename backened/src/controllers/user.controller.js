@@ -107,12 +107,12 @@ const loginUser = asyncHandler(async (req, res) => {
    const isPasswordValid = await user.isPasswordCorrect(password)
 
    if (!isPasswordValid) {
-      throw new ApiError(404, 'invalid  credentials')
+      throw new ApiError(404, 'incorrect password')
    }
 
    const { accessToken, refreshToken } = await generateAccessandRefreshToken(user._id)
 
-   const loggedinUser = await userModel.findById(user._id).select('-password -refreshToken')
+   const loggedinUser = await userModel.findById(user._id).select("-password -refreshToken")
 
    const accessOptions = {
       httpOnly: true,
@@ -244,7 +244,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 })
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-   const user = await userModel.findById(req.user?._id)
+   const user = await userModel.findById(req.user?._id).select('-password -refreshToken')
 
    if (!user) {
       throw new ApiError(400, 'unauthorized request')

@@ -2,46 +2,59 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from 'react-redux';
+import { toast } from 'sonner'
+import { updateUser } from "@/features/auth/authSlice";
 
 const EditProfile = () => {
 
-    const { register, watch, reset, handleSubmit, formState: { errors } } = useForm()
-    const [user, setuser] = useState()
+    const { register, watch, reset, handleSubmit, formState: { errors, dirtyFields } } = useForm()
+    const user = useSelector((state) => state.auth.user)
     const bio = watch("bio") || "";
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     useEffect(() => {
-        const fetchUser = async () => {
-            const response = await axios.get("http://localhost:3000/api/v1/users/current-user", {
-                withCredentials: true,
-            });
-
-            console.log(response);
-            setuser(response.data.data.user)
-
-
-            reset({
-                fullName: response.data.data.user.fullName,
-                username: response.data.data.user.username,
-                email: response.data.data.user.email,
-                bio: response.data.data.user.bio,
-            });
-        };
-
-        fetchUser();
-    }, []);
+        reset({
+            fullName: user?.fullName,
+            username: user?.username,
+            email: user?.email,
+            bio: user?.bio,
+        });
+    }, [user, reset]);
 
     const updateAccountDetail = async (data) => {
         try {
-            const response = await axios.patch('http://localhost:3000/api/v1/users/update-account',
+            await axios.patch(
+                "http://localhost:3000/api/v1/users/update-account",
                 data,
                 { withCredentials: true }
-            )
+            );
+
+            const fieldNames = {
+                fullName: "Full Name",
+                username: "Username",
+                email: "Email",
+                bio: "Bio",
+            };
+
+            const changedFields = Object.keys(dirtyFields);
+
+            if (changedFields.length === 0) {
+                toast.info("No changes made.");
+                return;
+            }
+
+            changedFields.forEach((field) => {
+                toast.success(`${fieldNames[field]} updated successfully`);
+            });
+
         } catch (error) {
-            console.log(error.response?.status);
-            console.log(error.response?.message);
+            toast.error(
+                error.response?.data?.message || "Something went wrong!"
+            );
         }
-    }
+    };
 
     const updateAvatar = async (e) => {
         const file = e.target.files[0];
@@ -52,7 +65,7 @@ const EditProfile = () => {
         formData.append("avatar", file);
 
         try {
-            await axios.patch(
+            const response = await axios.patch(
                 "http://localhost:3000/api/v1/users/avatar",
                 formData,
                 {
@@ -60,8 +73,12 @@ const EditProfile = () => {
                 }
             );
 
-            // Update preview or refetch user data
+            if (response) dispatch(updateUser(response.data.data.user))
+            if (response) toast.success('profile photo changed')
         } catch (error) {
+            toast.error(
+                error.response?.data?.message || "Something went wrong!"
+            );
             console.log(error);
         }
     };
@@ -75,7 +92,7 @@ const EditProfile = () => {
         formData.append("coverImage", file);
 
         try {
-            await axios.patch(
+            const response = await axios.patch(
                 "http://localhost:3000/api/v1/users/cover-image",
                 formData,
                 {
@@ -83,14 +100,15 @@ const EditProfile = () => {
                 }
             );
 
-            // Update preview or refetch user data
+            if (response) dispatch(updateUser(response.data.data.user))
+            if (response) toast.success('Banner  changed successfully')
         } catch (error) {
+            toast.error(
+                error.response?.data?.message || "Something went wrong!"
+            );
             console.log(error);
         }
     };
-
-    console.log(user);
-
 
     return (
         <div className="min-h-screen bg-zinc-950 text-white">

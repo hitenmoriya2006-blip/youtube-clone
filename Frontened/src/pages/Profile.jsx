@@ -5,33 +5,38 @@ import { logout } from '../features/auth/authSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner'
+
 
 const Profile = () => {
 
-    const [user, setuser] = useState()
+    // const [user, setuser] = useState()
     const [channnelStats, setchannnelStats] = useState()
     const [channelVideos, setchannelVideos] = useState([])
     const [showPasswordModel, setshowPasswordModel] = useState(false)
     const { register, handleSubmit, formState: { errors }, setError } = useForm()
     const dispatch = useDispatch()
     const navigate = useNavigate()
+    const user = useSelector((state) => state.auth.user)
+
+    
 
     useEffect(() => {
-        const currentUserData = async () => {
-            try {
-                const response = await axios.get('http://localhost:3000/api/v1/users/current-user',
-                    {
-                        withCredentials: true
-                    }
-                )
-                if (response) {
-                    setuser(response.data.data.user)
-                }
-            } catch (error) {
-                console.log(error.response?.status);
-                console.log(error.response?.data);
-            }
-        }
+        // const currentUserData = async () => {
+        //     try {
+        //         const response = await axios.get('http://localhost:3000/api/v1/users/current-user',
+        //             {
+        //                 withCredentials: true
+        //             }
+        //         )
+        //         if (response) {
+        //             setuser(response.data.data.user)
+        //         }
+        //     } catch (error) {
+        //         console.log(error.response?.status);
+        //         console.log(error.response?.data);
+        //     }
+        // }
 
         const channelStatsData = async () => {
             try {
@@ -65,7 +70,7 @@ const Profile = () => {
             }
         }
 
-        currentUserData()
+        // currentUserData()
         channelStatsData()
         channelVideosData()
     }, [])
@@ -108,6 +113,7 @@ const Profile = () => {
             )
 
             if (response) {
+                toast('user logout successfully')
                 dispatch(logout)
                 navigate('/login')
             }
@@ -125,8 +131,7 @@ const Profile = () => {
                     withCredentials: true
                 }
             )
-            console.log(response.data.data);
-            
+            if(response) toast.success('Password changed')
             setshowPasswordModel(false)
         } catch (error) {
             setError("oldPassword", {

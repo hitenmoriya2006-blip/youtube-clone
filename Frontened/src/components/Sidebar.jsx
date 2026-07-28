@@ -24,11 +24,6 @@ const Sidebar = ({ isOpen }) => {
     fetchedSubscribedChannels()
   }, [])
 
-  useEffect(() => {
-    console.log(subscribedChannel
-    );
-  },[subscribedChannel])
-
   if (!isOpen) {
     return (
       <nav className="fixed left-0 top-[56px] w-[72px]  h-[calc(100vh-56px)] bg-background flex flex-col items-center py-1 gap-1 overflow-y-auto overflow-x-hidden z-50 hidden lg:flex hide-scrollbar">
@@ -99,7 +94,7 @@ const Sidebar = ({ isOpen }) => {
         <h3 className="font-headline-lg text-[16px] font-bold text-on-surface px-3 pt-1 pb-2">Subscriptions</h3>
        {
         subscribedChannel.map((channel) => (
-           <Link to={`/channel/${channel.username}`} className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+           <Link to={`/channel/${channel.username}`} key={channel._id} className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <img className="w-6 h-6 rounded-full object-cover shrink-0" alt="Tech Minimalist" src={channel.avatar} />
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">{channel.fullName}</span>
           <span className="w-1 h-1 bg-[#3ea6ff] rounded-full shrink-0"></span>

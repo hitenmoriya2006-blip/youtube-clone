@@ -7,7 +7,8 @@ import { publishVideo,
          updateVideo,
          deleteVideo,
          togglePublishStatus,
-        getChannelVideos } from '../controllers/video.controller.js'
+         getChannelVideos,
+         relatedVideos } from '../controllers/video.controller.js'
 
 const router = express.Router()
 
@@ -27,5 +28,6 @@ router.route('/update/:videoId').patch(authMiddleware,upload.single('thumbnail')
 router.route('/delete/:videoId').delete(authMiddleware,deleteVideo)
 router.route('/toggle/:videoId').patch(authMiddleware,togglePublishStatus)
 router.route('/channel/:username').get(getChannelVideos)
+router.route('/related/:videoId').get(authMiddleware,relatedVideos)
 
 export default  router

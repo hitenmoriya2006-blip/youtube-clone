@@ -1,31 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import axios from 'axios'
-import {Link,useNavigate} from 'react-router-dom'
-import  {useDispatch,useSelector} from 'react-redux'
-import { login,logout } from '../features/auth/authSlice.js';
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { login } from '../features/auth/authSlice.js';
+import { toast } from 'sonner'
+
 
 const Login = () => {
 
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm()
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, handleSubmit, watch, reset, formState: { errors }, setError } = useForm()
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const loginAccount = async (data) =>{
+  const loginAccount = async (data) => {
     try {
-      const response = await  axios.post('http://localhost:3000/api/v1/users/login',
-         data,
+      const response = await axios.post('http://localhost:3000/api/v1/users/login',
+        data,
         {
           withCredentials: true
         }
       )
-      console.log(response.message);
+      if (response) toast.success("Successfully logged in"); 
       dispatch(login(response.data.data.user))
       navigate('/')
       reset()
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
+      setError('password', {
+        message: error.response?.data?.message
+      })
     }
   }
 
@@ -55,7 +61,8 @@ const Login = () => {
             <div className="relative group">
               <input className="peer w-full bg-surface-container-high border-outline/30 border rounded-lg px-4 pt-6 pb-2 focus:border-primary-container focus:ring-0 text-on-surface transition-all" id="first_name" name="first_name" placeholder=" " type="text"
                 {...register("login", {
-                  required: 'usernameOremail is required'
+                  required: 'username or email is required',
+                  message: 'incorrect username or email'
                 })}
               />
               {errors.login && (<span className=' text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm'>{errors.login.message}</span>)}
@@ -64,22 +71,49 @@ const Login = () => {
 
             {/* Password Section */}
             <div className="space-y-4">
-            
-                <div className="relative group">
-                  <input className="peer w-full bg-surface-container-high border-outline/30 border rounded-lg px-4 pt-6 pb-2 focus:border-primary-container focus:ring-0 text-on-surface transition-all" id="password" name="password" placeholder=" "
-                    {...register('password', {
-                      required: 'password is required',
-                    })}
-                  />
-                  {errors.password && (<span className=' text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm'>{errors.password.message}</span>)}
-                  <label className="absolute left-4 top-4 text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm" htmlFor="password">Password</label>
-                </div>             
 
-              <label className="flex items-center gap-3 cursor-pointer group px-1">
-                <span className='text-primary-container font-label-lg transition-all text-sm'>
-                  Forget password?
-                </span>
-              </label>
+              <div className="relative group">
+                <input className="peer w-full bg-surface-container-high border-outline/30 border rounded-lg px-4 pt-6 pb-2 focus:border-primary-container focus:ring-0 text-on-surface transition-all" id="password" name="password" placeholder=" " type={showPassword ? 'text' : 'password'}
+                  {...register('password', {
+                    required: 'password is required',
+                  })}
+                />
+                {errors.password && (<span className=' text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm'>{errors.password.message}</span>)}
+                <label className="absolute left-4 top-4 text-on-surface-variant font-label-lg transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-body-md peer-focus:top-1 peer-focus:text-label-sm peer-focus:text-primary-container peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-label-sm" htmlFor="password">Password</label>
+              </div>
+
+              <div className='flex justify-between items-center'>
+                <label className="flex items-center gap-3 cursor-pointer group px-1">
+                  <div className="relative w-5 h-5">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                    />
+
+                    <div className="w-5 h-5 border-2 border-outline/50 rounded flex items-center justify-center transition-colors group-hover:border-primary-container peer-checked:bg-primary-container peer-checked:border-primary-container">
+                      <span
+                        className="material-symbols-outlined text-white text-[16px]"
+                        style={{ fontVariationSettings: "'wght' 400" }}
+                      >
+                        {showPassword ? "check" : ""}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="font-label-lg text-on-surface select-none">
+                    Show password
+                  </span>
+                </label>
+
+
+                <label className="flex items-center gap-3 cursor-pointer group px-1">
+                  <span className='text-primary-container font-label-lg transition-all text-sm'>
+                    Forget password?
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* Footer Actions */}

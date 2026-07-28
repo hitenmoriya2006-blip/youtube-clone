@@ -330,6 +330,111 @@ const getAllVideo = asyncHandler(async (req, res) => {
     ))
 })
 
+const relatedVideos = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!videoId) {
+    throw new ApiError(400, 'invalid video id')
+  }
+
+  if (!(mongoose.Types.ObjectId.isValid(videoId))) {
+    throw new ApiError(400, 'Invalid videoId')
+  }
+
+  const video = await videoModel.findById(videoId)
+
+  if (!video) {
+    throw new ApiError(404, 'video not found')
+  }
+
+  let conditions = {
+    isPublished: true,
+    _id: {
+      $ne: new mongoose.Types.ObjectId(videoId)
+    }
+  }
+
+  if (video) {
+    const words = video.title
+      .replace(/[^\w\s]/g, "")
+      .split(" ");
+
+    const keywords = words
+      .filter(word => word.trim().length > 2)
+      .slice(-3);
+
+    conditions.$or = keywords.map(word => ({
+      title: {
+        $regex: word,
+        $options: "i",
+      },
+    }));
+  }
+
+  const relatedVideos = await videoModel.aggregate([
+    {
+      $match: conditions
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'owner',
+        foreignField: '_id',
+        as: 'owner',
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              username: 1,
+              avatar: 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      $addFields: {
+        owner: {
+          $first: '$owner'
+        }
+      }
+    },
+    {
+      $project: {
+        title: 1,
+        description: 1,
+        duration: 1,
+        createdAt: 1,
+        views: 1,
+        videoFile: 1,
+        thumbnail: 1,
+        owner: 1
+      }
+    },
+    {
+      $sort: {
+        views: -1,
+        createdAt: -1
+      }
+    },
+    {
+      $limit: 15
+    }
+  ])
+
+  if (relatedVideos.length === 0) {
+    return res.status(200).json(new ApiResponse(200, [], 'no related video found'))
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(
+      200,
+      relatedVideos,
+      'related videos fetched'
+    ))
+})
+
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params
   const { title, description } = req.body
@@ -518,4 +623,4 @@ const getChannelVideos = asyncHandler(async (req, res) => {
   );
 });
 
-export { publishVideo, getVideoById, getAllVideo, updateVideo, deleteVideo, togglePublishStatus, getChannelVideos }
+export { publishVideo, getVideoById, getAllVideo, updateVideo, deleteVideo, togglePublishStatus, getChannelVideos, relatedVideos }

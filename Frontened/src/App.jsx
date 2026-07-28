@@ -34,7 +34,7 @@ function App() {
             withCredentials: true,
           }
         );
-
+        
         dispatch(login(response.data.data.user));
       } catch (error) {
         if (error.response?.status !== 401) {

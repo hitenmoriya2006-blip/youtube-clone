@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
+import { toast } from 'sonner'
 
 
 const UploadVideo = () => {
@@ -10,8 +11,8 @@ const UploadVideo = () => {
   const [fileName, setFileName] = useState('No video selected');
   const [isDragging, setIsDragging] = useState(false);
   const [fileSelected, setFileSelected] = useState(false);
-  const [visibility, setVisibility] = useState(null);
-  const [description, setDescription] = useState('');
+  const [visibility, setVisibility] = useState(true);
+  const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null);
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -22,13 +23,6 @@ const UploadVideo = () => {
   const isVisibility = watch('isPublished')
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    setVisibility(isVisibility)
-    console.log(visibility);
-    
-  },[isVisibility])
-
   const handleFiles = (files) => {
     if (!files || !files.length) return;
 
@@ -62,39 +56,63 @@ const UploadVideo = () => {
 
   const handleDragLeave = () => setIsDragging(false);
 
-  const descCharCount = description.length;
-
-  const uploadVideo = async (data) => { 
+  const uploadVideo = async (data) => {
     try {
+      setUploading(true)
+
       data.isPublished = data.isPublished === 'true'
 
       const formData = new FormData()
 
-      if(!videoFile) alert('video file is required')
-      if(!thumbnail) alert('Thumbnail is required for ur video')
+      if (!videoFile) toast.error('video file is required')
+      if (!thumbnail) toast.error('Thumbnail is required for ur video')
 
       formData.append('videoFile', videoFile)
       formData.append('thumbnail', thumbnail)
       formData.append('title', data.title)
       formData.append('description', data.description)
       formData.append('isPublished', data.isPublished)
-     
+
       const response = await axios.post('http://localhost:3000/api/v1/videos/publish',
         formData,
         {
           withCredentials: true
         }
       )
-
-       if(response) navigate('/')
+      if (response) toast.success('video uploaded successfully')
+      if (response) navigate('/')
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
+    } finally {
+      setUploading(false)
     }
+  }
 
+  if (uploading) {
+    return <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div className="w-[360px] rounded-2xl bg-[#1f1f1f] border border-zinc-700 p-8 flex flex-col items-center">
+
+          <div className="w-14 h-14 rounded-full border-[4px] border-red-600 border-t-transparent animate-spin"></div>
+
+          <h2 className="mt-6 text-xl font-semibold text-white">
+            Uploading Video
+          </h2>
+
+          <p className="mt-2 text-sm text-zinc-400 text-center leading-6">
+            Please wait while your video is being uploaded.
+            <br />
+            This may take a few moments.
+          </p>
+
+        </div>
+      </div>
+    </>
   }
 
   return (
+
     <div className="bg-[#0F0F0F] text-on-surface min-h-screen py-12 px-4 md:px-8">
       <main className="max-w-4xl mx-auto space-y-10">
 
@@ -340,12 +358,14 @@ const UploadVideo = () => {
                   <h3 className="font-headline-md text-headline-md text-on-surface">Review Summary</h3>
 
                   {/* Preview Image */}
-                  <div className="aspect-video w-full rounded-lg overflow-hidden bg-surface-container-lowest" style={{ border: '1px solid rgba(96,62,57,0.05)' }}>
-                    <img
-                      className="w-full h-full object-cover"
-                      alt="Preview"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiLw_G-smJ5fv35OqColdbXJ8orRQSdvfccVJyuS3nXc5RuMuqQnwhMCkSgDrwuqJOlD2f1WJ2NrKoZvCbDU1AnvaDAMi1-fu_GSeZaic0qTrArA5338wq-k1t_3C28u6XY9F8_KC_e-J0y07-4OoOrctP7i7sCEH2zghT8E_jfwiHELloiowuu6Ocmn98sPByzfjbhyCFeyhbbqRVAzzgRw9iZ3I6HBXh-xBWitXh8ILQTlLrznA"
-                    />
+                  <div className="aspect-video w-full  rounded-lg overflow-hidden bg-surface-container-lowest" style={{ border: '1px solid rgba(96,62,57,0.05)' }}>
+                    {thumbnailPreview && (
+                      <img
+                        src={thumbnailPreview}
+                        alt="Thumbnail Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
 
                   {/* Details */}
@@ -360,7 +380,7 @@ const UploadVideo = () => {
                     </div>
                     <div className="flex justify-between items-start gap-4">
                       <span className="text-label-sm text-on-surface-variant uppercase tracking-wider">Visibility</span>
-                      <span className="text-label-sm text-on-surface text-right capitalize">{visibility ? 'public' : 'private'}</span>
+                      <span className="text-label-sm text-on-surface text-right capitalize">{isVisibility === 'false' ? 'private' : 'public'}</span>
                     </div>
                   </div>
 
@@ -384,10 +404,11 @@ const UploadVideo = () => {
               Cancel
             </button>
             <button
+              disabled={uploading}
               type='submit'
               className="w-full sm:w-auto px-10 py-3 rounded-full bg-primary text-on-primary font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all duration-150"
               style={{ boxShadow: '0 4px 20px rgba(255,181,168,0.2)' }}>
-              Upload Video
+              {uploading ? "Uploading..." : "Upload Video"}
             </button>
           </footer>
         </form>

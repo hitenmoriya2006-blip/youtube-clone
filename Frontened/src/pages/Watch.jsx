@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'
-import { useParams, Link, useNavigate, data } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
+import { toast } from 'sonner'
 
 const Watch = () => {
   const [isSubscribed, setIsSubscribed] = useState();
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState()
   const [isDisliked, setIsDisliked] = useState(false);
   const [allComments, setAllComments] = useState([])
   const [video, setvideo] = useState()
@@ -16,12 +18,8 @@ const Watch = () => {
   const [playlist, setPlaylist] = useState([])
   const navigate = useNavigate()
 
-  // Save popup state
+
   const [isSavePopupOpen, setIsSavePopupOpen] = useState(false);
-  const mockPlaylistsForSave = [
-    { id: 1, name: 'Watch later', privacy: 'Private', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800' },
-    { id: 2, name: 'Tailwindd project', privacy: 'Private', thumbnail: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=800' },
-  ];
 
   const { videoId } = useParams()
 
@@ -43,47 +41,9 @@ const Watch = () => {
         console.log(error.response?.data);
       }
     }
+
     fetchVideo()
   }, [videoId])
-
-  const toggleSubscription = async () => {
-    try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/subscription/toggleSub/${video?.owner?._id}`,
-        {},
-        { withCredentials: true }
-      )
-      if (response) {
-        setIsSubscribed(response.data.data.subscribed)
-      }
-    } catch (error) {
-      console.log(error.response?.status);
-      console.log(error.response?.data);
-    }
-  }
-
-  const toggleLike = async () => {
-    try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/like/toggle/${videoId}`,
-        {},
-        {
-          withCredentials: true
-        }
-      )
-
-      if (response) {
-        setIsLiked(response.data.data.liked)
-      }
-    } catch (error) {
-      console.log(error.response?.status);
-      console.log(error.response?.data);
-    }
-  }
-
-  const timeAgo = (date) => {
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
 
   useEffect(() => {
     const getAllComments = async () => {
@@ -102,15 +62,74 @@ const Watch = () => {
       }
     }
 
-    const fetchSuggestedVideos = async () => {
+    getAllComments()
+  }, [allComments])
+
+  const toggleSubscription = async () => {
+    try {
+      const response = await axios.patch(`http://localhost:3000/api/v1/subscription/toggleSub/${video?.owner?._id}`,
+        {},
+        { withCredentials: true }
+      )
+      if (response) {
+        toast.success(response.data?.message)
+        setIsSubscribed(response.data.data.subscribed)
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message)
+      console.log(error.response?.status);
+      console.log(error.response?.data?.message);
+    }
+  }
+
+  const toggleLike = async () => {
+    try {
+      const response = await axios.patch(`http://localhost:3000/api/v1/like/toggle/${videoId}`,
+        {},
+        {
+          withCredentials: true
+        }
+      )
+
+      const videoResponse = await axios.get(`http://localhost:3000/api/v1/videos/get/${videoId}`,
+        {
+          withCredentials: true,
+        }
+      )
+
+      if (videoResponse) {
+        setvideo(videoResponse.data.data)
+      }
+
+      if (response) {
+        toast.success(response.data.message)
+        setIsLiked(response.data.data.liked)
+      }
+    } catch (error) {
+      console.log(error.response?.status);
+      console.log(error.response?.data);
+    }
+  }
+
+  const timeAgo = (date) => {
+    return formatDistanceToNowStrict(new Date(date), {
+      addSuffix: true,
+    });
+  };
+
+  useEffect(() => {
+
+    const fetchRelatedVideos = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/videos/get-all',
+        const response = await axios.get(`http://localhost:3000/api/v1/videos/related/${videoId}`,
           {
             withCredentials: true
           }
         )
+        console.log(response.data.data);
+
         if (response) {
-          setsuggestedVideos(response.data.data.allVideos)
+          setsuggestedVideos(response.data.data)
         }
       } catch (error) {
         onsole.log(error.response?.status);
@@ -140,16 +159,13 @@ const Watch = () => {
           }
         )
         if (response) setPlaylist(response.data.data)
-          console.log(response);
-          
       } catch (error) {
         console.log(error.response?.status);
         console.log(error.response?.data);
       }
     }
 
-    getAllComments()
-    fetchSuggestedVideos()
+    fetchRelatedVideos()
     userInfoFetched()
     fetchedPlaylist()
   }, [])
@@ -180,6 +196,9 @@ const Watch = () => {
           withCredentials: true
         }
       )
+
+      setComment('')
+      setIsFocused(false)
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
@@ -189,13 +208,13 @@ const Watch = () => {
   const addVideoTOPlayList = async (playlistId) => {
     try {
       const response = await axios.patch(`http://localhost:3000/api/v1/playlist/add/${videoId}/${playlistId}`,
-       {},
-       {
-        withCredentials:true
-       }
+        {},
+        {
+          withCredentials: true
+        }
       )
       if (response) alert('Video added to Playlist')
-        setIsSavePopupOpen(false)
+      setIsSavePopupOpen(false)
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
@@ -246,7 +265,7 @@ const Watch = () => {
                     Join
                   </button>
                 </div>
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+                <div className="flex items-center gap-2 pb-2 md:pb-0">
                   <div className="flex items-center bg-surface-container-high rounded-full">
                     <button
                       onClick={toggleLike}
@@ -375,7 +394,7 @@ const Watch = () => {
                             <div className="flex items-center gap-4 mt-2">
                               <div className="flex items-center gap-1">
                                 <span className="material-symbols-outlined text-lg cursor-pointer">thumb_up</span>
-                                <span className="text-label-sm">842</span>
+                                <span className="text-label-sm">0</span>
                               </div>
                               <span className="material-symbols-outlined text-lg cursor-pointer">thumb_down</span>
                               <button className="text-label-sm font-bold hover:bg-surface-variant px-3 py-1 rounded-full">Reply</button>
