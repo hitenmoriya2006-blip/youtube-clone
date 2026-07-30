@@ -76,7 +76,7 @@ function App() {
           element:<UploadVideo />
         },
         {
-          path: '/edit-video',
+          path: '/edit-video/:videoId',
           element: <EditVideoDetails />
         },
         {

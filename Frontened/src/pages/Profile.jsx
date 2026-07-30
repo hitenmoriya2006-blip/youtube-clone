@@ -18,7 +18,7 @@ const Profile = () => {
     const navigate = useNavigate()
     const user = useSelector((state) => state.auth.user)
 
-    
+
 
     useEffect(() => {
         const channelStatsData = async () => {
@@ -37,6 +37,11 @@ const Profile = () => {
             }
         }
 
+        channelStatsData()
+
+    }, [])
+
+    useEffect(() => {
         const channelVideosData = async () => {
             try {
                 const response = await axios.get('http://localhost:3000/api/v1/dashboard/c/all-videos',
@@ -52,10 +57,8 @@ const Profile = () => {
                 console.log(error.response?.data);
             }
         }
-
-        channelStatsData()
         channelVideosData()
-    }, [])
+    }, [channelVideos])
 
     const timeAgo = (date) => {
         if (!date || isNaN(new Date(date).getTime())) {
@@ -113,7 +116,7 @@ const Profile = () => {
                     withCredentials: true
                 }
             )
-            if(response) toast.success('Password changed')
+            if (response) toast.success('Password changed')
             setshowPasswordModel(false)
         } catch (error) {
             setError("oldPassword", {
@@ -123,6 +126,21 @@ const Profile = () => {
         }
     }
 
+    const deleteVideo = async (videoId) => {
+        try {
+            const response = await axios.delete(`http://localhost:3000/api/v1/videos/delete/${videoId}`,
+                {
+                    withCredentials: true
+                }
+            )
+
+            if (response) toast.success('video successfully deleted')
+        } catch (error) {
+            console.log(error.response?.status);
+            console.log(error.response?.data);
+            toast.error(error.response?.data?.message)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-background text-white">
@@ -174,7 +192,7 @@ const Profile = () => {
                         </div>
 
                         <p className="mt-4 text-zinc-300 max-w-2xl">
-                            {user?.description ? user?.description : '' }
+                            {user?.description ? user?.description : ''}
                         </p>
                     </div>
 
@@ -276,7 +294,7 @@ const Profile = () => {
                                 <div>
                                     <p className="text-zinc-500 text-sm">Bio</p>
                                     <p className="mt-1 max-w-xl">
-                                      {user?.description}
+                                        {user?.description}
                                     </p>
                                 </div>
 
@@ -371,6 +389,7 @@ const Profile = () => {
                                 {channelVideos.map((video) => (
                                     <div
                                         key={video._id}
+                                        onClick={() => navigate(`/watch/${video._id}`)}
                                         className="group rounded-2xl overflow-hidden bg-zinc-900 hover:bg-zinc-800 transition cursor-pointer"
                                     >
 
@@ -381,6 +400,24 @@ const Profile = () => {
                                                 alt="thumbnail"
                                                 className="aspect-video w-full object-cover group-hover:scale-105 transition duration-300"
                                             />
+
+                                            {/* Delete & Edit Icons - top right on hover */}
+                                            <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); deleteVideo(video._id) }}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black/70 hover:bg-red-600 transition-colors"
+                                                    title="Delete video"
+                                                >
+                                                    <span className="material-symbols-outlined text-white text-[18px]">delete</span>
+                                                </button>
+                                                <button
+                                                    onClick={(e) => navigate(`/edit-video/${video._id}`)}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black/70 hover:bg-zinc-600 transition-colors"
+                                                    title="Edit video"
+                                                >
+                                                    <span className="material-symbols-outlined text-white text-[18px]">edit</span>
+                                                </button>
+                                            </div>
 
                                             <span className="absolute bottom-2 right-2 px-2 py-1 text-xs rounded bg-black/80">
                                                 {formatDuration(video?.duration)}

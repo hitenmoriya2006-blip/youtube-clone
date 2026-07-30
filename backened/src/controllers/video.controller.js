@@ -10,8 +10,8 @@ import mongoose from "mongoose"
 const publishVideo = asyncHandler(async (req, res) => {
   const { title, description, isPublished } = req.body
 
-  if (!title || !description) {
-    throw new ApiError(400, 'title & description is required')
+  if (!title) {
+    throw new ApiError(400, 'title is required')
   }
 
   const videoFilesPath = req.files?.videoFile[0]?.path
@@ -34,7 +34,7 @@ const publishVideo = asyncHandler(async (req, res) => {
     thumbnail: thumbnail.url,
     thumbnailPublicId: thumbnail.public_id,
     title: title,
-    description: description,
+    description: description || '',
     owner: req.user?._id,
     isPublished: isPublished || true,
     duration: videoFile.duration
@@ -170,7 +170,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     },
   },
     {
-      new: true
+       returnDocument:'after'
     })
 
   await userModel.findByIdAndUpdate(userId,
@@ -183,7 +183,7 @@ const getVideoById = asyncHandler(async (req, res) => {
       }
     },
     {
-      new: true
+      returnDocument:'after'
     }
   )
 
@@ -451,7 +451,13 @@ const updateVideo = asyncHandler(async (req, res) => {
   let updateField = {}
 
   if (title) {
-    updateField.title = title
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      throw new ApiError(400, "Title cannot be empty");
+    }
+
+    updateField.title = trimmedTitle;
   }
 
   if (description) {
@@ -473,20 +479,21 @@ const updateVideo = asyncHandler(async (req, res) => {
   if (thumbnailLocalPAth) {
     thumbnail = await uploadOnCloudinary(thumbnailLocalPAth)
 
-    if (!thumbnail) {
-      throw new ApiError(500, 'something went wrong')
+    if (!thumbnail.url) {
+      throw new ApiError(500, 'Thumbnail upload failed')
     }
     await deleteFromCloudinary(video?.thumbnailPublicId)
 
     updateField.thumbnail = thumbnail.url
+    updateField.thumbnailPublicId = thumbnail.public_id;
   }
 
   const updatedVideo = await videoModel.findByIdAndUpdate(videoId,
     {
-      $set: updateFeild
+      $set: updateField
     },
     {
-      new: true
+      returnDocument:'after'
     }
   )
 

@@ -11,7 +11,6 @@ const UploadVideo = () => {
   const [fileName, setFileName] = useState('No video selected');
   const [isDragging, setIsDragging] = useState(false);
   const [fileSelected, setFileSelected] = useState(false);
-  const [visibility, setVisibility] = useState(true);
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null);
 
@@ -19,7 +18,7 @@ const UploadVideo = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState("");
   const thumbnailInputRef = useRef(null);
 
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm()
+  const { register, handleSubmit, formState: { errors }, watch } = useForm()
   const isVisibility = watch('isPublished')
 
   const navigate = useNavigate()
@@ -84,6 +83,7 @@ const UploadVideo = () => {
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
+      toast.error(error.response?.data?.message)
     } finally {
       setUploading(false)
     }
@@ -278,9 +278,7 @@ const UploadVideo = () => {
                     }}
                     onFocus={(e) => { e.target.style.borderColor = '#ff5540'; e.target.style.boxShadow = '0 0 0 2px rgba(255,85,64,0.2)'; }}
                     onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none'; }}
-                    {...register('description', {
-                      required: 'desscription is required'
-                    })}
+                    {...register('description')}
                   />
                   {errors.description && (
                     <p className="text-red-500 text-sm mt-2">

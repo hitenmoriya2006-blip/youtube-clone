@@ -8,7 +8,7 @@ import { updateUser } from "@/features/auth/authSlice";
 
 const EditProfile = () => {
 
-    const { register, watch, reset, handleSubmit, formState: { errors, dirtyFields } } = useForm()
+    const { register, reset, handleSubmit, formState: { errors, dirtyFields } } = useForm()
     const user = useSelector((state) => state.auth.user)
     const navigate = useNavigate()
     const dispatch = useDispatch()
