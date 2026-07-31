@@ -128,6 +128,32 @@ const getChannelVideos = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup:{
+                from:"comments",
+                localField:'_id',
+                foreignField:'video',
+                as:'comments'
+            }
+        },
+        {
+            $lookup:{
+                from:'likes',
+                localField:'_id',
+                foreignField:'video',
+                as:'likes'
+            }
+        },
+        {
+            $addFields:{
+                commentsCount:{
+                    $size:'$comments'
+                },
+                likesCount:{
+                    $size:'$likes'
+                }
+            }
+        },
+        {
            $sort:{
                 createdAt:-1
            }
@@ -139,7 +165,9 @@ const getChannelVideos = asyncHandler(async (req, res) => {
                 views: 1,
                 isPublished: 1,
                 createdAt: 1,
-                duration:1
+                duration:1,
+                commentsCount:1,
+                likesCount:1
             }
         }
     ])

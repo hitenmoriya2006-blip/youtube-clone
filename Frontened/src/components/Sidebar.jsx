@@ -75,7 +75,7 @@ const Sidebar = ({ isOpen }) => {
           <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 0" }}>video_library</span>
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Playlists</span>
         </Link>
-        <Link className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+        <Link to={`/your-videos`} className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 0" }}>smart_display</span>
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Your Videos</span>
         </Link>

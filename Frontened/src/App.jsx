@@ -19,6 +19,8 @@ import SearchResults from './pages/SearchResults'
 import Playlists from './pages/Playlists';
 import PlaylistDetails from './pages/PlaylistDetails'
 import WatchHistory from './pages/WatchHistory'
+import LikedVideos from './pages/LikedVideos';
+import YourVideos from './pages/YourVideos';
 
 
 function App() {
@@ -94,6 +96,14 @@ function App() {
         {
           path:'/history',
           element: <WatchHistory />
+        },
+        {
+          path:'/liked',
+          element: <LikedVideos />
+        },
+        {
+          path:'/your-videos',
+          element:<YourVideos />
         }
       ]
     },

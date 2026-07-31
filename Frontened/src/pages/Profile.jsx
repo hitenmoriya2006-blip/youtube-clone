@@ -44,7 +44,7 @@ const Profile = () => {
     useEffect(() => {
         const channelVideosData = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/v1/dashboard/c/all-videos',
+                const response = await axios.get('http://localhost:3000/api/v1/dashboard/c/all-videos?limit=3',
                     {
                         withCredentials: true
                     }
@@ -375,7 +375,7 @@ const Profile = () => {
                             Your Latest Uploads
                         </h2>
 
-                        <button className="px-5 py-2 rounded-full border border-zinc-700 hover:bg-zinc-900 transition">
+                        <button onClick={() =>  navigate('/your-videos')} className="px-5 py-2 rounded-full border border-zinc-700 hover:bg-zinc-900 transition">
                             View All
                         </button>
                     </div>
