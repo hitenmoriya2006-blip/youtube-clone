@@ -358,7 +358,6 @@ const YourVideos = () => {
             </div>
             <div>
               <h2 className="text-5xl font-extrabold text-white group-hover:text-primary transition-colors duration-500">{statsData?.totalViews}</h2>
-              <p className="text-on-surface-variant text-body-md mt-2 font-medium">Global reach last 28 days</p>
             </div>
           </div>
 

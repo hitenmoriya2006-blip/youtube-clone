@@ -31,15 +31,15 @@ const Sidebar = ({ isOpen }) => {
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
           <span className="text-[10px] scale-90 whitespace-nowrap">Home</span>
         </Link>
-        <Link className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+        {/* <Link className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>bolt</span>
           <span className="text-[10px] scale-90 whitespace-nowrap">Shorts</span>
-        </Link>
-        <Link className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+        </Link> */}
+        {/* <Link className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>subscriptions</span>
           <span className="text-[10px] scale-90 whitespace-nowrap">Subscriptions</span>
-        </Link>
-        <Link className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+        </Link> */}
+        <Link to={'/profile'} className="flex flex-col items-center justify-center gap-1.5 w-[64px] h-[74px] rounded-lg text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>account_circle</span>
           <span className="text-[10px] scale-90 whitespace-nowrap">You</span>
         </Link>
@@ -55,10 +55,10 @@ const Sidebar = ({ isOpen }) => {
           <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Home</span>
         </Link>
-        <Link className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+        {/* <Link className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 0" }}>subscriptions</span>
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Subscriptions</span>
-        </Link>
+        </Link> */}
       </div>
 
       {/* You Section */}
@@ -79,11 +79,7 @@ const Sidebar = ({ isOpen }) => {
           <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 0" }}>smart_display</span>
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Your Videos</span>
         </Link>
-        <Link className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
-          <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 0" }}>schedule</span>
-          <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Watch Later</span>
-        </Link>
-        <Link className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
+        <Link to={'/liked'} className="flex items-center gap-6 px-3 h-10 rounded-[10px] text-[14px] font-normal text-on-surface transition-colors hover:bg-surface-container-high" href="#">
           <span className="material-symbols-outlined text-[24px] shrink-0" style={{ fontVariationSettings: "'FILL' 0" }}>thumb_up</span>
           <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">Liked videos</span>
         </Link>

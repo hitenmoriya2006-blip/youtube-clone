@@ -36,14 +36,9 @@ const getLikedVideo = asyncHandler(async (req, res) => {
                                 {
                                     $project: {
                                         fullName: 1,
-                                        username: 1,
-                                        email: 1,
-                                        subscriberTo: 1,
-                                        subscribersCount: 1,
-                                        channelsSubscribedToCount: 1,
                                         avatar: 1,
                                         coverImage: 1,
-                                        isSubscribed: 1,
+                                      
                                     }
                                 }
                             ]
@@ -72,6 +67,11 @@ const getLikedVideo = asyncHandler(async (req, res) => {
             }
         },
         {
+            $sort:{
+                createdAt: -1
+            }
+        },
+        {
             $addFields: {
                 video: {
                     $first: '$video'
@@ -81,11 +81,6 @@ const getLikedVideo = asyncHandler(async (req, res) => {
         {
             $replaceRoot: {
                 newRoot: "$video"
-            }
-        },
-        {
-            $project: {
-                video: 1
             }
         }
     ])
