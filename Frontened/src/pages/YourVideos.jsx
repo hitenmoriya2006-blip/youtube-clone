@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'
 import { formatDistanceToNowStrict } from "date-fns";
+import api from '@/api/axios';
 
 
 const VisibilityBadge = ({ visibility }) => {
@@ -64,7 +64,7 @@ const YourVideos = () => {
   useEffect(() => {
     const fetchChannelData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/dashboard/c/stats`,
+        const response = await api.get(`/dashboard/c/stats`,
           {
             withCredentials: true
           }
@@ -81,7 +81,7 @@ const YourVideos = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/dashboard/c/all-videos?page=${page}&limit=${limit}`,
+        const response = await api.get(`/dashboard/c/all-videos?page=${page}&limit=${limit}`,
           { withCredentials: true }
         )
 
@@ -133,7 +133,7 @@ const YourVideos = () => {
 
   const deleteVideo = async (videoId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/v1/videos/delete/${videoId}`,
+      const response = await api.delete(`/videos/delete/${videoId}`,
         {
           withCredentials: true
         }

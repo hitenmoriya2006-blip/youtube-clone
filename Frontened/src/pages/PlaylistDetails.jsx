@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
 import { useForm } from 'react-hook-form';
+import api from '@/api/axios';
 
 const PlaylistDetails = () => {
 
@@ -29,7 +29,7 @@ const PlaylistDetails = () => {
 
   const editPlaylist = async (data) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/playlist/update/${playlist._id}`,
+      const response = await api.patch(`/playlist/update/${playlist._id}`,
         data,
         {
           withCredentials: true
@@ -44,7 +44,7 @@ const PlaylistDetails = () => {
 
   const removeVideoFromPlaylist = async (videoId) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/playlist/remove/${videoId}/${playlist._id}`,
+     await api.patch(`/playlist/remove/${videoId}/${playlist._id}`,
         {},
         {
           withCredentials:true
@@ -57,7 +57,7 @@ const PlaylistDetails = () => {
 
   const deletePlaylist = async (playlistId) => {
     try {
-      const  response = await axios.delete(`http://localhost:3000/api/v1/playlist/delete/${playlistId}`,
+      const  response = await api.delete(`/playlist/delete/${playlistId}`,
         {
           withCredentials:true
         }
@@ -73,7 +73,7 @@ const PlaylistDetails = () => {
   useEffect(() => {
     const fetchedPLaylist = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/playlist/${playlistId}`, {
+        const response = await api.get(`/playlist/${playlistId}`, {
           withCredentials: true
         })
         if (response) setPlaylist(response.data.data)

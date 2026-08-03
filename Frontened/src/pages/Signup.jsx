@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
-import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import api from '@/api/axios';
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +26,7 @@ const Signup = () => {
         formData.append("coverImage", data.coverImage[0]);
       }
 
-      const response = await axios.post('http://localhost:3000/api/v1/users/register',
+      const response = await api.post('/users/register',
         formData,
         {
           withCredentials: true

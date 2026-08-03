@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
 import { toast } from 'sonner'
+import api from '@/api/axios';
 
 
 const UploadVideo = () => {
@@ -72,7 +72,7 @@ const UploadVideo = () => {
       formData.append('description', data.description)
       formData.append('isPublished', data.isPublished)
 
-      const response = await axios.post('http://localhost:3000/api/v1/videos/publish',
+      const response = await api.post('/videos/publish',
         formData,
         {
           withCredentials: true

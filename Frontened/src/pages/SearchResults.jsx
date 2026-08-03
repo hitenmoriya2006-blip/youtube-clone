@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios'
 import { useSearchParams,useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
+import api from '@/api/axios';
 
 const SearchResults = () => {
   const chips = ['All', 'Recent', 'Tech', 'AI', 'Tutorials', 'Gaming', 'Review'];
@@ -16,7 +17,7 @@ const SearchResults = () => {
     const fetchSearchedVideo = async () => {
 
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/videos/get-all?query=${query}`,
+        const response = await api.get(`/videos/get-all?query=${query}`,
           {
             withCredentials: true
           }

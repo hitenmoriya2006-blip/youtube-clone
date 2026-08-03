@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
-import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { login } from '../features/auth/authSlice.js';
 import { toast } from 'sonner'
+import api from '@/api/axios.jsx';
 
 
 const Login = () => {
@@ -16,7 +16,7 @@ const Login = () => {
 
   const loginAccount = async (data) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/users/login',
+      const response = await api.post('/users/login',
         data,
         {
           withCredentials: true

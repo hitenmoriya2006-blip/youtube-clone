@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams,useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
-import axios from 'axios'
+import api from '@/api/axios';
 
 const Channel = () => {
   const [activeTab, setActiveTab] = useState('Home');
@@ -16,7 +16,7 @@ const Channel = () => {
   useEffect(() => {
     const fetchChannelData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/users/channel/${username}`,
+        const response = await api.get(`/users/channel/${username}`,
           {
             withCredentials: true
           }
@@ -34,7 +34,7 @@ const Channel = () => {
 
     const fetchVideos = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/videos/channel/${username}`,
+        const response = await api.get(`/videos/channel/${username}`,
           {
             withCredentials: true
           }
@@ -53,7 +53,7 @@ const Channel = () => {
 
   const toggleSubscription = async () => {
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/subscription/toggleSub/${channelData?._id}`,
+      const response = await api.patch(`/subscription/toggleSub/${channelData?._id}`,
         {},
         { withCredentials: true }
       )

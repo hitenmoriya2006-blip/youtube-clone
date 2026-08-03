@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios'
 import { formatDistanceToNowStrict } from "date-fns";
 import HistoryVideoSkeleton from '@/skeleton/HistoryVideoSkeleton';
 import { toast } from 'sonner'
+import api from '@/api/axios';
+
 
 
 const WatchHistory = () => {
@@ -14,7 +15,7 @@ const WatchHistory = () => {
 
   const handleClearAll = async () => {
     try {
-      const response = await axios.delete('http://localhost:3000/api/v1/users/history/clear',
+     await api.delete('/users/history/clear',
         {
           withCredentials: true
         }
@@ -26,7 +27,7 @@ const WatchHistory = () => {
 
   const removeVideoFromHistory = async (videoId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/v1/users/history/remove/${videoId}`,
+      const response = await api.delete(`/users/history/remove/${videoId}`,
         { withCredentials: true }
       )
       
@@ -47,7 +48,7 @@ const WatchHistory = () => {
     const fetchWatchedHistory = async () => {
       try {
         setLoading(true)
-        const response = await axios.get('http://localhost:3000/api/v1/users/history',
+        const response = await api.get('/users/history',
           {
             withCredentials: true
           }

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from 'axios'
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner'
 import { updateUser } from "@/features/auth/authSlice";
+import api from "@/api/axios";
 
 const EditProfile = () => {
 
@@ -28,8 +28,8 @@ const EditProfile = () => {
     const updateAccountDetail = async (data) => {
         console.log(data);
         try {
-            await axios.patch(
-                "http://localhost:3000/api/v1/users/update-account",
+            await api.patch(
+                "/users/update-account",
                 data,
                 { withCredentials: true }
             );
@@ -68,8 +68,8 @@ const EditProfile = () => {
         formData.append("avatar", file);
 
         try {
-            const response = await axios.patch(
-                "http://localhost:3000/api/v1/users/avatar",
+            const response = await api.patch(
+                "/users/avatar",
                 formData,
                 {
                     withCredentials: true,
@@ -95,8 +95,8 @@ const EditProfile = () => {
         formData.append("coverImage", file);
 
         try {
-            const response = await axios.patch(
-                "http://localhost:3000/api/v1/users/cover-image",
+            const response = await api.patch(
+                "/users/cover-image",
                 formData,
                 {
                     withCredentials: true,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChipBar from '../components/ChipBar';
 import VideoGrid from '../components/VideoGrid';
-import axios from 'axios'
+import api from '@/api/axios';
 
 function Home() {
 
@@ -12,7 +12,7 @@ function Home() {
     const fetchAllVideos = async () => {
       try {
         setLoading(true)
-        const response = await axios.get('http://localhost:3000/api/v1/videos/get-all',
+        const response = await api.get('/videos/get-all',
           {
             withCredentials: true
           })

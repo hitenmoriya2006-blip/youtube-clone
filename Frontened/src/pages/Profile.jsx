@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import { formatDistanceToNowStrict } from "date-fns";
 import { logout } from '../features/auth/authSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner'
+import api from '@/api/axios';
 
 
 const Profile = () => {
@@ -23,7 +23,7 @@ const Profile = () => {
     useEffect(() => {
         const channelStatsData = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/v1/dashboard/c/stats',
+                const response = await api.get('/dashboard/c/stats',
                     {
                         withCredentials: true
                     }
@@ -44,7 +44,7 @@ const Profile = () => {
     useEffect(() => {
         const channelVideosData = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/v1/dashboard/c/all-videos?limit=3',
+                const response = await api.get('/dashboard/c/all-videos?limit=3',
                     {
                         withCredentials: true
                     }
@@ -90,7 +90,7 @@ const Profile = () => {
 
     const logoutAccount = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/api/v1/users/logout',
+            const response = await api.post('/users/logout',
                 {},
                 {
                     withCredentials: true,
@@ -110,7 +110,7 @@ const Profile = () => {
 
     const changePassword = async (data) => {
         try {
-            const response = await axios.patch('http://localhost:3000/api/v1/users/change-password',
+            const response = await api.patch('/users/change-password',
                 data,
                 {
                     withCredentials: true
@@ -128,7 +128,7 @@ const Profile = () => {
 
     const deleteVideo = async (videoId) => {
         try {
-            const response = await axios.delete(`http://localhost:3000/api/v1/videos/delete/${videoId}`,
+            const response = await api.delete(`/videos/delete/${videoId}`,
                 {
                     withCredentials: true
                 }

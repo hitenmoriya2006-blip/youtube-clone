@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
 import { toast } from 'sonner'
 import SuggestedVideoSkeleton from '@/skeleton/SuggestedVideoSkeleton';
 import CommentSkeleton from '@/skeleton/CommentSkeleton';
 import VideoPlayer from '@/components/VideoPlayer';
+import api from '@/api/axios';
 
 const Watch = () => {
   const [isSubscribed, setIsSubscribed] = useState();
@@ -32,7 +32,7 @@ const Watch = () => {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/videos/get/${videoId}`,
+        const response = await api.get(`/videos/get/${videoId}`,
           {
             withCredentials: true,
           }
@@ -55,7 +55,7 @@ const Watch = () => {
     const getAllComments = async () => {
       try {
         setCommentLoading(true)
-        const response = await axios.get(`http://localhost:3000/api/v1/comment/get-comments/${videoId}`,
+        const response = await api.get(`/comment/get-comments/${videoId}`,
           {
             withCredentials: true
           }
@@ -81,7 +81,7 @@ const Watch = () => {
 
   const toggleSubscription = async () => {
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/subscription/toggleSub/${video?.owner?._id}`,
+      const response = await api.patch(`/subscription/toggleSub/${video?.owner?._id}`,
         {},
         { withCredentials: true }
       )
@@ -98,14 +98,14 @@ const Watch = () => {
 
   const toggleLike = async () => {
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/like/toggle/${videoId}`,
+      const response = await api.patch(`/like/toggle/${videoId}`,
         {},
         {
           withCredentials: true
         }
       )
 
-      const videoResponse = await axios.get(`http://localhost:3000/api/v1/videos/get/${videoId}`,
+      const videoResponse = await api.get(`/videos/get/${videoId}`,
         {
           withCredentials: true,
         }
@@ -136,7 +136,7 @@ const Watch = () => {
     const fetchRelatedVideos = async () => {
       try {
         setLoading(true)
-        const response = await axios.get(`http://localhost:3000/api/v1/videos/related/${videoId}`,
+        const response = await api.get(`/videos/related/${videoId}`,
           {
             withCredentials: true
           }
@@ -156,7 +156,7 @@ const Watch = () => {
 
     const userInfoFetched = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/users/current-user',
+        const response = await api.get('/users/current-user',
           {
             withCredentials: true
           }
@@ -170,7 +170,7 @@ const Watch = () => {
 
     const fetchedPlaylist = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/playlist/user',
+        const response = await api.get('/playlist/user',
           {
             withCredentials: true
           }
@@ -207,7 +207,7 @@ const Watch = () => {
 
   const addComment = async () => {
     try {
-      const response = await axios.post(`http://localhost:3000/api/v1/comment/add/${videoId}`,
+      const response = await api.post(`/comment/add/${videoId}`,
         { comment },
         {
           withCredentials: true
@@ -242,7 +242,7 @@ const Watch = () => {
     }));
 
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/like/toggle/c/${commentId}`, {}, { withCredentials: true });
+      const response = await api.patch(`/like/toggle/c/${commentId}`, {}, { withCredentials: true });
       if (response) toast.success(response.data?.message)
 
     } catch (error) {
@@ -264,7 +264,7 @@ const Watch = () => {
   const handleReplySubmit = async (commentId) => {
     if (!replyContent.trim()) return;
     try {
-      const response = await axios.post(`http://localhost:3000/api/v1/comment/add/${videoId}`,
+      const response = await api.post(`/comment/add/${videoId}`,
         { comment: replyContent, parentId: commentId },
         { withCredentials: true }
       );
@@ -291,7 +291,7 @@ const Watch = () => {
 
   const addVideoTOPlayList = async (playlistId) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/api/v1/playlist/add/${videoId}/${playlistId}`,
+      const response = await api.patch(`/playlist/add/${videoId}/${playlistId}`,
         {},
         {
           withCredentials: true

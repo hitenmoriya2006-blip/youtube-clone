@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams,useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import axios from 'axios'
+
 import { toast } from 'sonner'
+import api from '@/api/axios';
 
 const EditVideoDetails = () => {
 
@@ -23,7 +24,7 @@ const EditVideoDetails = () => {
 
     const fetchVideoData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/videos/get/${videoId}`,
+        const response = await api.get(`/videos/get/${videoId}`,
           {
             withCredentials: true
           }
@@ -92,7 +93,7 @@ const EditVideoDetails = () => {
       const hasVideoInfoChanged = dirtyFields.title || dirtyFields.description || thumbnail
 
       if (hasVideoInfoChanged) {
-        await axios.patch(`http://localhost:3000/api/v1/videos/update/${videoId}`,
+        await api.patch(`/videos/update/${videoId}`,
           formData,
           {
             withCredentials: true
@@ -101,7 +102,7 @@ const EditVideoDetails = () => {
       }
 
       if (dirtyFields.isPublished) {
-        await axios.patch(`http://localhost:3000/api/v1/videos/toggle/${videoId}`,
+        await api.patch(`/videos/toggle/${videoId}`,
           {},
           {
             withCredentials: true

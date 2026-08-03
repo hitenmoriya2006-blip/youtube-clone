@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios'
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import api from '@/api/axios';
 
 const Playlists = () => {
   // Use these to test the loading and empty states
@@ -24,7 +24,7 @@ const Playlists = () => {
   useEffect(() => {
     const getUserPlaylist = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/playlist/user',
+        const response = await api.get('/playlist/user',
           {
             withCredentials: true
           }
@@ -44,7 +44,7 @@ const Playlists = () => {
     console.log('start');
 
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/playlist/create',
+      const response = await api.post('/playlist/create',
         data,
         {
           withCredentials: true
@@ -328,7 +328,7 @@ const Playlists = () => {
                 onClick={async (e) => {
                   e.preventDefault();
                   try {
-                    await axios.delete(`http://localhost:3000/api/v1/playlist/delete/${playlistToDelete._id}`, {
+                    await api.delete(`/playlist/delete/${playlistToDelete._id}`, {
                       withCredentials: true
                     });
                     setPlaylist(playlist.filter(p => p._id !== playlistToDelete._id));
