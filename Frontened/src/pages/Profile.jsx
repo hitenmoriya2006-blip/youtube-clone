@@ -332,7 +332,7 @@ const Profile = () => {
                                 </p>
                             </button>
 
-                            <button className="bg-zinc-800 rounded-xl p-5 hover:bg-zinc-700 transition active:scale-95">
+                            <button onClick={() => navigate('/your-videos')} className="bg-zinc-800 rounded-xl p-5 hover:bg-zinc-700 transition active:scale-95">
                                 <span className="material-symbols-outlined text-4xl mb-3">
                                     video_library
                                 </span>
@@ -342,7 +342,7 @@ const Profile = () => {
                                 </p>
                             </button>
 
-                            <button className="bg-zinc-800 rounded-xl p-5 hover:bg-zinc-700 transition active:scale-95">
+                            <button onClick={() => navigate('/liked')} className="bg-zinc-800 rounded-xl p-5 hover:bg-zinc-700 transition active:scale-95">
                                 <span className="material-symbols-outlined text-4xl mb-3">
                                     favorite
                                 </span>
@@ -352,7 +352,7 @@ const Profile = () => {
                                 </p>
                             </button>
 
-                            <button className="bg-zinc-800 rounded-xl p-5 hover:bg-zinc-700 transition active:scale-95">
+                            <button onClick={() => navigate('/history')} className="bg-zinc-800 rounded-xl p-5 hover:bg-zinc-700 transition active:scale-95">
                                 <span className="material-symbols-outlined text-4xl mb-3">
                                     history
                                 </span>

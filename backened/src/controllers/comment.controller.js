@@ -8,7 +8,7 @@ import { videoModel } from "../models/video.model.js"
 
 const addComment = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    const { comment } = req.body
+    const { comment, parentId } = req.body
 
     if (!comment || comment.trim() === '') {
         throw new ApiError(400, 'comment is required')
@@ -31,7 +31,8 @@ const addComment = asyncHandler(async (req, res) => {
     const createdComment = await commentModel.create({
         content: comment,
         video: videoId,
-        owner: req.user?._id
+        owner: req.user?._id,
+        parentComment: parentId || null
     })
 
     if (!createdComment) {
@@ -162,45 +163,102 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     const aggregation = commentModel.aggregate([
         {
-            $match:{
-                video: new mongoose.Types.ObjectId(videoId)
+            $match: {
+                video: new mongoose.Types.ObjectId(videoId),
+                parentComment: null
             }
         },
         {
-            $sort:{
-                createdAt:-1
+            $sort: {
+                createdAt: -1
             }
         },
         {
-            $lookup:{
-                from:'users',
-                localField:'owner',
-                foreignField:'_id',
-                as:'owner',
-                pipeline:[
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'owner',
+                pipeline: [
                     {
-                        $project:{
-                            fullName:1,
-                            username:1,
-                            avatar:1
+                        $project: {
+                            fullName: 1,
+                            username: 1,
+                            avatar: 1
                         }
                     }
                 ]
             }
         },
         {
-            $addFields:{
-                owner:{
-                    $first:'$owner'
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "comment",
+                as: "likes"
+            }
+        },
+        {
+            $lookup: {
+                from: "comments",
+                localField: "_id",
+                foreignField: "parentComment",
+                as: "replies",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: { $first: "$owner" }
+                        }
+                    },
+                    {
+                        $sort: { createdAt: -1 }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                owner: {
+                    $first: '$owner'
+                },
+                likesCount: {
+                    $size: "$likes"
+                },
+                isLiked: {
+                    $cond: {
+                        if: { $in: [req.user?._id, "$likes.likedBy"] },
+                        then: true,
+                        else: false
+                    }
                 }
             }
         },
         {
-            $project:{
-                content:1,
-                owner:1,
-                createdAt:1,
-                updatedAt:1
+            $project: {
+                content: 1,
+                owner: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                likesCount: 1,
+                isLiked: 1,
+                replies: 1
             }
         }
     ])

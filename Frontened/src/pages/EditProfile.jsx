@@ -13,6 +13,9 @@ const EditProfile = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
+    console.log(user);
+    
+
     useEffect(() => {
         reset({
             fullName: user?.fullName,

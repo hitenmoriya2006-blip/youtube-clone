@@ -3,11 +3,13 @@ import axios from 'axios'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
 import { toast } from 'sonner'
+import SuggestedVideoSkeleton from '@/skeleton/SuggestedVideoSkeleton';
+import CommentSkeleton from '@/skeleton/CommentSkeleton';
+import VideoPlayer from '@/components/VideoPlayer';
 
 const Watch = () => {
   const [isSubscribed, setIsSubscribed] = useState();
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState()
   const [isDisliked, setIsDisliked] = useState(false);
   const [allComments, setAllComments] = useState([])
   const [video, setvideo] = useState()
@@ -16,10 +18,14 @@ const Watch = () => {
   const [comment, setComment] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [playlist, setPlaylist] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [commentLoading, setCommentLoading] = useState(true)
   const navigate = useNavigate()
 
 
   const [isSavePopupOpen, setIsSavePopupOpen] = useState(false);
+  const [replyingToId, setReplyingToId] = useState(null);
+  const [replyContent, setReplyContent] = useState("");
 
   const { videoId } = useParams()
 
@@ -48,22 +54,30 @@ const Watch = () => {
   useEffect(() => {
     const getAllComments = async () => {
       try {
+        setCommentLoading(true)
         const response = await axios.get(`http://localhost:3000/api/v1/comment/get-comments/${videoId}`,
           {
             withCredentials: true
           }
         )
         if (response) {
-          setAllComments(response.data.data.docs)
+          const commentsWithMockState = response.data.data.docs.map(c => ({
+            ...c,
+            isLiked: false,
+            likesCount: 0
+          }));
+          setAllComments(commentsWithMockState)
         }
       } catch (error) {
         console.log(error.response?.status);
         console.log(error.response?.data);
+      } finally {
+        setCommentLoading(false)
       }
     }
 
     getAllComments()
-  }, [allComments])
+  }, [videoId])
 
   const toggleSubscription = async () => {
     try {
@@ -121,6 +135,7 @@ const Watch = () => {
 
     const fetchRelatedVideos = async () => {
       try {
+        setLoading(true)
         const response = await axios.get(`http://localhost:3000/api/v1/videos/related/${videoId}`,
           {
             withCredentials: true
@@ -132,8 +147,10 @@ const Watch = () => {
           setsuggestedVideos(response.data.data)
         }
       } catch (error) {
-        onsole.log(error.response?.status);
+        console.log(error.response?.status);
         console.log(error.response?.data);
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -199,9 +216,76 @@ const Watch = () => {
 
       setComment('')
       setIsFocused(false)
+      if (response.data?.data) {
+        const newComment = { ...response.data.data, isLiked: false, likesCount: 0 };
+        setAllComments(prev => [newComment, ...prev]);
+      }
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
+    }
+  }
+
+  const handleLikeComment = async (commentId) => {
+    console.log(commentId);
+
+    setAllComments(prev => prev.map(c => {
+      if (c._id === commentId) {
+        const wasLiked = c.isLiked;
+        return {
+          ...c,
+          isLiked: !wasLiked,
+          likesCount: wasLiked ? c.likesCount - 1 : c.likesCount + 1
+        };
+      }
+      return c;
+    }));
+
+    try {
+      const response = await axios.patch(`http://localhost:3000/api/v1/like/toggle/c/${commentId}`, {}, { withCredentials: true });
+      if (response) toast.success(response.data?.message)
+
+    } catch (error) {
+      setAllComments(prev => prev.map(c => {
+        if (c._id === commentId) {
+          const wasLiked = c.isLiked;
+          return {
+            ...c,
+            isLiked: !wasLiked,
+            likesCount: wasLiked ? c.likesCount - 1 : c.likesCount + 1
+          };
+        }
+        return c;
+      }));
+      console.log("Like API error", error);
+    }
+  }
+
+  const handleReplySubmit = async (commentId) => {
+    if (!replyContent.trim()) return;
+    try {
+      const response = await axios.post(`http://localhost:3000/api/v1/comment/add/${videoId}`,
+        { comment: replyContent, parentId: commentId },
+        { withCredentials: true }
+      );
+      toast.success("Reply posted");
+      setReplyingToId(null);
+      setReplyContent("");
+
+      if (response.data?.data) {
+        setAllComments(prev => prev.map(c => {
+          if (c._id === commentId) {
+            return {
+              ...c,
+              replies: [response.data.data, ...(c.replies || [])]
+            }
+          }
+          return c;
+        }));
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to post reply");
     }
   }
 
@@ -224,8 +308,6 @@ const Watch = () => {
   return (
     <div className="font-body-lg text-on-surface bg-surface h-screen overflow-y-auto">
 
-
-
       {/* Main Content Grid */}
       <main className="pt-4  min-h-screen">
         <div className="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-6 p-4 lg:p-4">
@@ -233,8 +315,9 @@ const Watch = () => {
           <div className="flex-1 lg:max-w-[calc(100%-400px)]">
             {/* Video Player */}
             <div className="relative aspect-video bg-black rounded-xl overflow-hidden group cursor-pointer shadow-2xl">
-              <video src={video?.videoFile} controls autoPlay
-                className="w-full h-full object-cover opacity-80" alt="Video Player"></video>
+              {/* <video src={video?.videoFile} controls autoPlay
+                className="w-full h-full object-cover opacity-80" alt="Video Player"></video> */}
+                <VideoPlayer src={video?.videoFile} poster={video?.thumbnail} title={video?.title} />
             </div>
 
             {/* Video Metadata */}
@@ -242,31 +325,38 @@ const Watch = () => {
               <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold leading-tight">
                 {video?.title}
               </h1>
-              <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Link to={`/channel/${video?.owner?.username}`}>  <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container">
-                    <img className="w-full h-full object-cover" alt="Nexus Tech Lab Logo" src={video?.owner?.avatar} />
-                  </div></Link>
-                  <div>
-                    <Link to={`/channel/${video?.owner?.username}`}><h3 className="font-headline-md text-headline-md">{video?.owner?.fullName}</h3></Link>
-                    <p className="text-label-sm text-on-surface-variant">{video?.subscribersCount} subscribers</p>
+              <div className="mt-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-start gap-3 w-full lg:w-auto">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Link to={`/channel/${video?.owner?.username}`} className="shrink-0">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container">
+                        <img className="w-full h-full object-cover" alt="Nexus Tech Lab Logo" src={video?.owner?.avatar} />
+                      </div>
+                    </Link>
+                    <div className="min-w-0 pr-2">
+                      <Link to={`/channel/${video?.owner?.username}`}><h3 className="font-headline-md text-headline-md truncate">{video?.owner?.fullName}</h3></Link>
+                      <p className="text-label-sm text-on-surface-variant truncate">{video?.subscribersCount} subscribers</p>
+                    </div>
                   </div>
 
-                  <button
-                    onClick={toggleSubscription}
-                    className={`ml-4 px-4 py-2 rounded-full font-bold text-label-lg transition-all active:scale-95 ${isSubscribed
-                      ? 'bg-surface-container-high text-on-surface-variant'
-                      : 'bg-on-surface text-surface hover:opacity-90'
-                      }`}
-                  >
-                    {isSubscribed ? 'Subscribed' : 'Subscribe'}
-                  </button>
-                  <button className="px-4 py-2 bg-surface-container-high text-on-surface rounded-full font-bold text-label-lg hover:bg-surface-variant transition-colors active:scale-95">
-                    Join
-                  </button>
+                  <div className="flex items-center gap-2 mt-2 sm:mt-0 ml-auto sm:ml-2 shrink-0">
+                    <button
+                      onClick={toggleSubscription}
+                      className={`px-4 py-2 rounded-full font-bold text-label-lg transition-all active:scale-95 whitespace-nowrap ${isSubscribed
+                        ? 'bg-surface-container-high text-on-surface-variant'
+                        : 'bg-on-surface text-surface hover:opacity-90'
+                        }`}
+                    >
+                      {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                    </button>
+                    <button className="px-4 py-2 bg-surface-container-high text-on-surface rounded-full font-bold text-label-lg hover:bg-surface-variant transition-colors active:scale-95 whitespace-nowrap hidden sm:block">
+                      Join
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 pb-2 md:pb-0">
-                  <div className="flex items-center bg-surface-container-high rounded-full">
+
+                <div className="flex items-center gap-2 pb-2 lg:pb-0 overflow-x-auto scrollbar-hide w-full lg:w-auto">
+                  <div className="flex items-center bg-surface-container-high rounded-full shrink-0">
                     <button
                       onClick={toggleLike}
                       className={`flex items-center gap-2 px-4 py-2 border-r border-outline-variant hover:bg-surface-variant transition-colors rounded-l-full ${isLiked ? 'text-primary-container' : ''
@@ -375,35 +465,116 @@ const Watch = () => {
                 </div>
               </div>
               {/* Comment List */}
+
               {
-                allComments.length === 0 ?
-                  <div className='text-white font-medium text-center'>no comments on this video</div> :
+                commentLoading ? (
                   <div className="space-y-6">
-                    {
-                      allComments.map((comts) => (
-                        <div key={comts._id} className="flex gap-4">
-                          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                            <img className="w-full h-full object-cover" alt="User Avatar" src={comts.owner?.avatar} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-label-lg font-bold">{comts.owner?.fullName}</span>
-                              <span className="text-label-sm text-on-surface-variant">{timeAgo(comts.createdAt)}</span>
-                            </div>
-                            <p className="text-body-md">{comts.content}</p>
-                            <div className="flex items-center gap-4 mt-2">
-                              <div className="flex items-center gap-1">
-                                <span className="material-symbols-outlined text-lg cursor-pointer">thumb_up</span>
-                                <span className="text-label-sm">0</span>
-                              </div>
-                              <span className="material-symbols-outlined text-lg cursor-pointer">thumb_down</span>
-                              <button className="text-label-sm font-bold hover:bg-surface-variant px-3 py-1 rounded-full">Reply</button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    }
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <CommentSkeleton key={index} />
+                    ))}
                   </div>
+                ) :
+                  allComments.length === 0 ?
+                    (<div className='text-white font-medium text-center'>no comments on this video</div>) :
+                    (
+                      <div className="space-y-6">
+                        {allComments.map((comts) => (
+                          <div key={comts._id} className="flex gap-4">
+                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                              <img className="w-full h-full object-cover" alt="User Avatar" src={comts.owner?.avatar} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-label-lg font-bold">{comts.owner?.fullName}</span>
+                                <span className="text-label-sm text-on-surface-variant">{timeAgo(comts.createdAt)}</span>
+                              </div>
+                              <p className="text-body-md">{comts.content}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <button onClick={() => handleLikeComment(comts._id)} className="flex items-center gap-1 hover:bg-surface-variant px-2 py-1 rounded-full transition-colors">
+                                  <span className="material-symbols-outlined text-lg" style={{ color: comts.isLiked ? '#ef4444' : 'inherit', fontVariationSettings: comts.isLiked ? "'FILL' 1" : "'FILL' 0" }}>thumb_up</span>
+                                  <span className="text-label-sm">{comts.likesCount}</span>
+                                </button>
+                                <button className="flex items-center hover:bg-surface-variant p-1 rounded-full transition-colors">
+                                  <span className="material-symbols-outlined text-lg">thumb_down</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setReplyingToId(comts._id);
+                                    setReplyContent("");
+                                  }}
+                                  className="text-label-sm font-bold hover:bg-surface-variant px-3 py-1 rounded-full transition-colors">
+                                  Reply
+                                </button>
+                              </div>
+
+                              {/* Reply Input Box */}
+                              {replyingToId === comts._id && (
+                                <div className="mt-4 flex gap-4">
+                                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                    <img className="w-full h-full object-cover" src={userInfo?.avatar} alt="User Avatar" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="border-b border-outline-variant focus-within:border-on-surface transition-colors pb-1">
+                                      <input
+                                        type="text"
+                                        autoFocus
+                                        placeholder="Add a reply..."
+                                        value={replyContent}
+                                        onChange={(e) => setReplyContent(e.target.value)}
+                                        className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-body-md placeholder:text-on-surface-variant"
+                                      />
+                                    </div>
+                                    <div className="flex justify-end gap-2 mt-3">
+                                      <button
+                                        onClick={() => {
+                                          setReplyingToId(null);
+                                          setReplyContent("");
+                                        }}
+                                        className="px-4 py-2 rounded-full font-medium text-label-lg hover:bg-surface-container-high transition-colors"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        disabled={!replyContent.trim()}
+                                        onClick={() => handleReplySubmit(comts._id)}
+                                        className={`px-4 py-2 rounded-full font-medium text-label-lg transition-colors ${replyContent.trim()
+                                          ? "bg-primary text-on-primary hover:opacity-90"
+                                          : "bg-surface-container-high text-on-surface-variant cursor-not-allowed"
+                                          }`}
+                                      >
+                                        Reply
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Replies List */}
+                              {comts.replies && comts.replies.length > 0 && (
+                                <div className="mt-4 space-y-4 pl-4 border-l border-outline-variant/30">
+                                  {comts.replies.map(reply => (
+                                    <div key={reply._id} className="flex gap-3">
+                                      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                        <img className="w-full h-full object-cover" alt="User Avatar" src={reply.owner?.avatar} />
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="text-label-sm font-bold">{reply.owner?.fullName}</span>
+                                          <span className="text-[11px] text-on-surface-variant">{reply.createdAt && timeAgo(reply.createdAt)}</span>
+                                        </div>
+                                        <p className="text-body-md text-sm">{reply.content}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                            </div>
+                          </div>
+                        ))
+                        }
+                      </div>
+                    )
               }
             </div>
           </div>
@@ -420,21 +591,27 @@ const Watch = () => {
             {/* Related Videos */}
             <div className="flex flex-col gap-3">
               {
-                suggestedVideos.map((video) => (
-                  <Link to={`/watch/${video._id}`} key={video._id}>
-                    <div className="flex gap-3 group cursor-pointer">
-                      <div className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
-                        <img className="w-full h-full object-cover" alt="Motherboard" src={video.thumbnail} />
-                        <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">{formatDuration(video.duration)}</span>
+                loading ? <div className="flex flex-col gap-4">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <SuggestedVideoSkeleton key={index} />
+                  ))}
+                </div>
+                  :
+                  suggestedVideos.map((video) => (
+                    <Link to={`/watch/${video._id}`} key={video._id}>
+                      <div className="flex gap-3 group cursor-pointer">
+                        <div className="relative w-40 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+                          <img className="w-full h-full object-cover" alt="Motherboard" src={video.thumbnail} />
+                          <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">{formatDuration(video.duration)}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <h4 className="text-label-lg font-bold leading-tight line-clamp-2 group-hover:text-primary-container transition-colors">{video.title}</h4>
+                          <p className="text-[12px] text-on-surface-variant hover:text-on-surface">{video.owner?.fullName}</p>
+                          <p className="text-[12px] text-on-surface-variant">{video.views} views • {timeAgo(video.createdAt)}</p>
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <h4 className="text-label-lg font-bold leading-tight line-clamp-2 group-hover:text-primary-container transition-colors">{video.title}</h4>
-                        <p className="text-[12px] text-on-surface-variant hover:text-on-surface">{video.owner?.fullName}</p>
-                        <p className="text-[12px] text-on-surface-variant">{video.views} views • {timeAgo(video.createdAt)}</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))
+                    </Link>
+                  ))
               }
             </div>
           </div>

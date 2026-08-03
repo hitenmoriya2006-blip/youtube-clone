@@ -21,6 +21,8 @@ import PlaylistDetails from './pages/PlaylistDetails'
 import WatchHistory from './pages/WatchHistory'
 import LikedVideos from './pages/LikedVideos';
 import YourVideos from './pages/YourVideos';
+import { setLoading } from './features/auth/authSlice';
+import api from './api/axios';
 
 
 function App() {
@@ -30,8 +32,8 @@ function App() {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/v1/users/current-user",
+        const response = await api.get(
+          "/users/current-user",
           {
             withCredentials: true,
           }
@@ -42,7 +44,8 @@ function App() {
         if (error.response?.status !== 401) {
           console.error(error);
         }
-
+      } finally {
+        dispatch(setLoading(false))
       }
     };
 

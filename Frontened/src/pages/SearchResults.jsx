@@ -171,9 +171,9 @@ const SearchResults = () => {
         <div className="flex flex-col items-center justify-center py-16 border-t border-outline/10 mt-8">
           <span className="material-symbols-outlined text-secondary text-[32px] mb-2">check_circle</span>
           <p className="text-secondary font-label-lg">You've reached the end of the results</p>
-          <button className="mt-4 px-6 py-2 rounded-full border border-outline/30 text-on-surface font-label-lg hover:bg-surface-variant/20 transition-colors">
+          {/* <button className="mt-4 px-6 py-2 rounded-full border border-outline/30 text-on-surface font-label-lg hover:bg-surface-variant/20 transition-colors">
             Back to top
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

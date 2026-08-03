@@ -3,7 +3,7 @@ import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNowStrict } from "date-fns";
 import { toast } from 'sonner'
-
+import LikedVideoSkeleton from '@/skeleton/LikedVideoSkeleton';
 
 
 const LikedVideos = () => {
@@ -20,21 +20,16 @@ const LikedVideos = () => {
             withCredentials: true
           }
         )
-       if(response) setLikedVideos(response.data.data)
+        if (response) setLikedVideos(response.data.data)
       } catch (error) {
-        toast.error(error.response?.data?.message)
-        console.log(error);
+        toast.error('something went wrong')
+        console.log(error.response?.data);
       } finally {
         setLoading(false)
       }
     }
     fetchLikedVideo()
   }, [])
-
-  useEffect(() => {
-    console.log(likedVideos);
-
-  }, [likedVideos])
 
   const timeAgo = (date) => {
     if (!date || isNaN(new Date(date).getTime())) {
@@ -64,16 +59,12 @@ const LikedVideos = () => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  
+  useEffect(() => {
+    console.log(loading);
 
-  if (loading) {
-    return <div className="mt-16 text-centre flex justify-center pb-10">
-      <div className="flex items-center gap-3 text-on-surface-variant font-label-lg opacity-60 text-sm">
-        <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <span>Loading...</span>
-      </div>
-    </div>
-  }
+  }, [loading])
+
+
 
   return (
     <div className="bg-background min-h-screen text-on-surface font-body-md">
@@ -135,6 +126,7 @@ const LikedVideos = () => {
               <div className="flex flex-col gap-3 mt-8">
                 <Link to={`/watch/${likedVideos[0]?._id}`}>
                   <button
+                  disabled={likedVideos.length ===0}
                     className="w-full bg-white text-black py-3 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.98] transition-all"
                     style={{ boxShadow: '0 0 15px rgba(255,85,64,0.3)', transition: 'all 0.3s ease' }}
                   >
@@ -155,46 +147,61 @@ const LikedVideos = () => {
           </div>
 
           {/* Video grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
-           {
-            likedVideos.length === 0 ? <div className='text-white font-medium text-lg text-center my-4'>No video liked by you yet !</div>
-            :
-             likedVideos.map((video) => (
-              <Link key={video._id} to={`/watch/${video._id}`} className="group cursor-pointer flex flex-col gap-4">
-                {/* Thumbnail */}
-                <div className="relative aspect-video rounded-2xl overflow-hidden bg-surface-container border border-white/5 transition-all duration-500 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:-translate-y-1">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  {/* Red tint overlay on hover */}
-                  <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  {/* Duration badge */}
-                  <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[12px] px-2 py-0.5 rounded-lg font-bold border border-white/10">
-                    {formatDuration(video.duration)}
-                  </div>
-                </div>
 
-                {/* Meta */}
-                <div className="flex gap-3 px-1">
-                  <div className="w-11 h-11 rounded-full bg-surface-container-high flex-shrink-0 overflow-hidden ring-2 ring-transparent group-hover:ring-primary/40 transition-all shadow-lg">
-                    <img src={video.owner.avatar} alt={video.channel} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <h3 className="font-headline-md text-headline-md text-on-surface line-clamp-2 leading-snug group-hover:text-primary transition-colors">
-                      {video.title}
-                    </h3>
-                    <div className="flex flex-col">
-                      <p className="text-label-lg font-medium text-on-surface-variant hover:text-on-surface transition-colors text-sm">{video.channel}</p>
-                      <p className="text-label-sm text-on-surface-variant/70 text-xs">{video.views} views • {timeAgo(video.createdAt)}</p>
+          {
+          loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <LikedVideoSkeleton key={index} />
+            ))}
+          </div>
+          ) :
+         likedVideos.length === 0 ? (
+          <div>No liked video !</div>
+         ) : (
+           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
+            {
+              likedVideos.map((video) => (
+
+                <Link key={video._id} to={`/watch/${video._id}`} className="group cursor-pointer flex flex-col gap-4">
+                  {/* Thumbnail */}
+                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-surface-container border border-white/5 transition-all duration-500 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] ">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Red tint overlay on hover */}
+                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {/* Duration badge */}
+                    <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[12px] px-2 py-0.5 rounded-lg font-bold border border-white/10">
+                      {formatDuration(video.duration)}
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))
-           }
+
+                  {/* Meta */}
+                  <div className="flex gap-3 px-1">
+                    <div className="w-11 h-11 rounded-full bg-surface-container-high flex-shrink-0 overflow-hidden ring-2 ring-transparent group-hover:ring-primary/40 transition-all shadow-lg">
+                      <img src={video.owner.avatar} alt={video.channel} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <h3 className="font-headline-md text-headline-md text-on-surface line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                        {video.title}
+                      </h3>
+                      <div className="flex flex-col">
+                        <p className="text-label-lg font-medium text-on-surface-variant hover:text-on-surface transition-colors text-sm">{video.channel}</p>
+                        <p className="text-label-sm text-on-surface-variant/70 text-xs">{video.views} views • {timeAgo(video.createdAt)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            }
           </div>
+         )
+          }
+
+
         </section>
 
       </div>
@@ -203,3 +210,7 @@ const LikedVideos = () => {
 };
 
 export default LikedVideos;
+
+
+
+

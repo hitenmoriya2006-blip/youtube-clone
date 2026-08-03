@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios'
 import { formatDistanceToNowStrict } from "date-fns";
+import HistoryVideoSkeleton from '@/skeleton/HistoryVideoSkeleton';
+import { toast } from 'sonner'
 
 
 const WatchHistory = () => {
 
   const [historyData, setHistoryData] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [loading, setLoading] = useState(true)
 
   const handleClearAll = async () => {
     try {
@@ -26,11 +29,15 @@ const WatchHistory = () => {
       const response = await axios.delete(`http://localhost:3000/api/v1/users/history/remove/${videoId}`,
         { withCredentials: true }
       )
-      if(response) console.log(response);
       
+      setHistoryData((prev) =>
+        prev.filter((video) => video._id !== videoId)
+      );
+      toast.success(response.data?.message)
     } catch (error) {
       console.log(error.response?.status);
       console.log(error.response?.data);
+      toast.error(error.response?.data?.message)
     }
   }
 
@@ -39,6 +46,7 @@ const WatchHistory = () => {
   useEffect(() => {
     const fetchWatchedHistory = async () => {
       try {
+        setLoading(true)
         const response = await axios.get('http://localhost:3000/api/v1/users/history',
           {
             withCredentials: true
@@ -47,10 +55,12 @@ const WatchHistory = () => {
         if (response) setHistoryData(response.data.data)
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false)
       }
     }
     fetchWatchedHistory()
-  }, [historyData])
+  }, [])
 
   const formatDuration = (duration) => {
     const totalSeconds = Math.floor(duration);
@@ -80,10 +90,6 @@ const WatchHistory = () => {
     });
   };
 
-  // useEffect(() => {
-  //   console.log(historyData);
-  // }, [historyData])
-
   return (
     <div className="bg-background min-h-screen text-on-background font-body-md">
       <div className="flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-8 max-w-[1400px] mx-auto">
@@ -104,72 +110,80 @@ const WatchHistory = () => {
               </h2>
             </div>
           ) :
-            <section className="space-y-4">
-              {historyData.map((video) => (
-                <div
-                  key={video._id}
-                  className="group flex flex-col sm:flex-row gap-4 p-2 rounded-xl hover:bg-surface-container-low transition-all relative"
-                >
-                  {/* Thumbnail */}
-                  <Link to={`/watch/${video._id}`} className="relative flex-shrink-0 w-full sm:w-60 aspect-video rounded-lg overflow-hidden border border-white/5 block">
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute bottom-1 right-1 bg-black/80 text-[10px] font-bold px-1.5 py-0.5 rounded text-white">
-                      {formatDuration(video.duration)}
-                    </div>
-                  </Link>
-
-                  {/* Info */}
-                  <div className="flex flex-col flex-1 py-1">
-                    <div className="flex justify-between items-start gap-4">
-                      <Link to={`/watch/${video._id}`}>
-                        <h3 className="text-headline-md font-headline-md text-on-surface group-hover:text-primary transition-colors line-clamp-2">
-                          {video.title}
-                        </h3>
+            (
+              loading ? <div className="flex flex-col gap-10">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <HistoryVideoSkeleton key={index} />
+                ))}
+              </div> :
+                <section className="space-y-4">
+                  {historyData.map((video) => (
+                    <div
+                      key={video._id}
+                      className="group flex flex-col sm:flex-row gap-4 max-h-[151px] p-2 rounded-xl hover:bg-surface-container-low transition-all relative"
+                    >
+                      {/* Thumbnail */}
+                      <Link to={`/watch/${video._id}`} className="relative flex-shrink-0 w-full sm:w-60 aspect-video rounded-lg overflow-hidden border border-white/5 block">
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute bottom-1 right-1 bg-black/80 text-[10px] font-bold px-1.5 py-0.5 rounded text-white">
+                          {formatDuration(video.duration)}
+                        </div>
                       </Link>
 
-                      {/* Three-dot dropdown */}
-                      <div className="relative flex-shrink-0">
-                        <button
-                          onClick={() => setOpenDropdown(openDropdown === video._id ? null : video._id)}
-                          className={`p-1 hover:bg-white/10 rounded-full transition-all flex-shrink-0 ${openDropdown === video._id ? 'opacity-100 bg-white/10' : 'opacity-0 group-hover:opacity-100'}`}
-                        >
-                          <span className="material-symbols-outlined text-on-surface-variant">more_vert</span>
-                        </button>
+                      {/* Info */}
+                      <div className="flex flex-col flex-1 py-1">
+                        <div className="flex justify-between items-start gap-4">
+                          <Link to={`/watch/${video._id}`}>
+                            <h3 className="text-headline-md font-headline-md text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+                              {video.title}
+                            </h3>
+                          </Link>
 
-                        {openDropdown === video._id && (
-                          <div className="absolute right-0 top-full mt-1 w-52 bg-surface-container-highest rounded-lg shadow-xl border border-white/5 py-1 z-50">
+                          {/* Three-dot dropdown */}
+                          <div className="relative flex-shrink-0">
                             <button
-                              onClick={() => removeVideoFromHistory(video._id)}
-                              className="w-full flex items-center gap-2 px-4 py-2 text-label-lg text-error hover:bg-white/5 transition-colors text-left"
+                              onClick={() => setOpenDropdown(openDropdown === video._id ? null : video._id)}
+                              className={`p-1 hover:bg-white/10 rounded-full transition-all flex-shrink-0 ${openDropdown === video._id ? 'opacity-100 bg-white/10' : 'opacity-0 group-hover:opacity-100'}`}
                             >
-                              <span className="material-symbols-outlined text-error text-[20px]">delete</span>
-                              Remove from history
+                              <span className="material-symbols-outlined text-on-surface-variant">more_vert</span>
                             </button>
 
+                            {openDropdown === video._id && (
+                              <div className="absolute right-0 top-full mt-1 w-52 bg-surface-container-highest rounded-lg shadow-xl border border-white/5 py-1 z-50">
+                                <button
+                                  onClick={() => removeVideoFromHistory(video._id)}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-label-lg text-error hover:bg-white/5 transition-colors text-left"
+                                >
+                                  <span className="material-symbols-outlined text-error text-[20px]">delete</span>
+                                  Remove from history
+                                </button>
+
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-1 text-label-sm font-label-sm text-on-surface-variant">
+                          <span>{video.owner?.fullName}</span>
+                          <span className="w-1 h-1 bg-on-surface-variant rounded-full"></span>
+                          <span>{video.views} views</span>
+                          <span className="w-1 h-1 bg-on-surface-variant rounded-full"></span>
+                          <span>{timeAgo(video.createdAt)}</span>
+                        </div>
+                        <p className="mt-2 text-body-md text-secondary line-clamp-2 hidden sm:block">
+                          {video.description}
+                        </p>
                       </div>
                     </div>
+                  ))}
 
-                    <div className="flex items-center gap-2 mt-1 text-label-sm font-label-sm text-on-surface-variant">
-                      <span>{video.owner?.fullName}</span>
-                      <span className="w-1 h-1 bg-on-surface-variant rounded-full"></span>
-                      <span>{video.views} views</span>
-                      <span className="w-1 h-1 bg-on-surface-variant rounded-full"></span>
-                      <span>{timeAgo(video.createdAt)}</span>
-                    </div>
-                    <p className="mt-2 text-body-md text-secondary line-clamp-2 hidden sm:block">
-                      {video.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                </section>
 
-            </section>
+            )
           }
         </div>
 
@@ -225,33 +239,3 @@ export default WatchHistory;
 
 
 
-//  const [searchQuery, setSearchQuery] = useState('');
-//   const [isPaused, setIsPaused] = useState(false);
-//   const [historyData, setHistoryData] = useState([mockHistory]);
-//   const [openDropdown, setOpenDropdown] = useState(null);
-//   const [history, sethistory] = useState([])
-
-//   const handleRemove = (section, videoId) => {
-//     setHistoryData(prev => {
-//       const updated = { ...prev };
-//       updated[section] = updated[section].filter(v => v._id !== videoId);
-//       if (updated[section].length === 0) delete updated[section];
-//       return updated;
-//     });
-//     setOpenDropdown(null);
-//   };
-
-//   const handleClearAll = () => {
-//     setHistoryData({});
-//   };
-
-//   const filteredSections = Object.entries(historyData).reduce((acc, [section, videos]) => {
-//     const filtered = videos.filter(v =>
-//       v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       v.channel.toLowerCase().includes(searchQuery.toLowerCase())
-//     );
-//     if (filtered.length > 0) acc[section] = filtered;
-//     return acc;
-//   }, {});
-
-//   const isEmpty = Object.keys(filteredSections).length === 0;

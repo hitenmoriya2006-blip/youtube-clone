@@ -5,6 +5,7 @@ import { deleteFromCloudinary, uploadOnCloudinary } from "../services/storage.js
 import mongoose from "mongoose"
 import { likeModel } from "../models/like.model.js"
 import { videoModel } from "../models/video.model.js"
+import {commentModel} from '../models/comment.model.js'
 
 const getLikedVideo = asyncHandler(async (req, res) => {
     const userId = req.user?._id
@@ -16,7 +17,8 @@ const getLikedVideo = asyncHandler(async (req, res) => {
     const likedVideos = await likeModel.aggregate([
         {
             $match: {
-                likedBy: new mongoose.Types.ObjectId(userId)
+                likedBy: new mongoose.Types.ObjectId(userId),
+                video: { $ne: null }
             }
         },
         {
@@ -38,7 +40,7 @@ const getLikedVideo = asyncHandler(async (req, res) => {
                                         fullName: 1,
                                         avatar: 1,
                                         coverImage: 1,
-                                      
+
                                     }
                                 }
                             ]
@@ -67,11 +69,6 @@ const getLikedVideo = asyncHandler(async (req, res) => {
             }
         },
         {
-            $sort:{
-                createdAt: -1
-            }
-        },
-        {
             $addFields: {
                 video: {
                     $first: '$video'
@@ -79,12 +76,21 @@ const getLikedVideo = asyncHandler(async (req, res) => {
             }
         },
         {
+            $match: {
+                video: { $ne: null }
+            }
+        },
+        {
             $replaceRoot: {
                 newRoot: "$video"
             }
+        },
+        {
+            $sort: {
+                createdAt: -1
+            }
         }
     ])
-
 
     if (likedVideos.length === 0) {
         return res
@@ -109,8 +115,8 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const userId = req.user?._id
 
-    if(!videoId){
-         throw new ApiError(404, 'videoId is required')
+    if (!videoId) {
+        throw new ApiError(404, 'videoId is required')
     }
 
     if (!mongoose.Types.ObjectId.isValid(videoId)) {
@@ -119,8 +125,8 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
     const video = await videoModel.findById(videoId)
 
-    if(!video){
-        throw new ApiError(404,'video not found')
+    if (!video) {
+        throw new ApiError(404, 'video not found')
     }
 
     const alreadyExist = await likeModel.findOne({
@@ -134,16 +140,16 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
             video: videoId
         })
     } else {
-       await alreadyExist.deleteOne()
+        await alreadyExist.deleteOne()
     }
 
-     return res
-             .status(200)
-             .json(new ApiResponse(
-                200,
-                alreadyExist ? {liked:false} : {liked:true},
-                alreadyExist ? 'Video unliked successfully' : 'Video liked successfully'
-             ))
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            alreadyExist ? { liked: false } : { liked: true },
+            alreadyExist ? 'Video unliked successfully' : 'Video liked successfully'
+        ))
 
 })
 
@@ -151,18 +157,18 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     const { commentId } = req.params
     const userId = req.user?._id
 
-    if(!commentId){
-         throw new ApiError(404, 'commentId is required')
+    if (!commentId) {
+        throw new ApiError(404, 'commentId is required')
     }
 
     if (!mongoose.Types.ObjectId.isValid(commentId)) {
         throw new ApiError(400, 'Invalid videoId')
     }
 
-    const comment = await videoModel.findById(commentId)
+    const comment = await commentModel.findById(commentId)
 
-    if(!comment){
-        throw new ApiError(404,'comment not found')
+    if (!comment) {
+        throw new ApiError(404, 'comment not found')
     }
 
     const alreadyExist = await likeModel.findOne({
@@ -179,16 +185,16 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         await alreadyExist.deleteOne()
     }
 
-     return res
-             .status(200)
-             .json(new ApiResponse(
-                200,
-                alreadyExist ? {liked:false} : {liked:true},
-                alreadyExist ? 'comment unliked successfully' : 'comment liked successfully'
-             ))
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            alreadyExist ? { liked: false } : { liked: true },
+            alreadyExist ? 'comment unliked successfully' : 'comment liked successfully'
+        ))
 
 })
 
 
 
-export { getLikedVideo,toggleVideoLike, toggleCommentLike,  }
+export { getLikedVideo, toggleVideoLike, toggleCommentLike, }

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios'
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+
 
 
 const Header = ({ onMenuClick }) => {
@@ -55,7 +55,7 @@ const Header = ({ onMenuClick }) => {
 
       {/* Right: Actions & Profile */}
       <div className="flex items-center gap-2 shrink-0">
-        <button className="w-10 h-10 rounded-full bg-transparent border-none text-on-surface flex items-center justify-center relative transition-colors hover:bg-surface-container-highest">
+        <button onClick={() => navigate('/upload')} className="w-10 h-10 rounded-full bg-transparent border-none text-on-surface flex items-center justify-center relative transition-colors hover:bg-surface-container-highest">
           <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 0" }}>video_call</span>
         </button>
         <button className="w-10 h-10 rounded-full bg-transparent border-none text-on-surface flex items-center justify-center relative transition-colors hover:bg-surface-container-highest">

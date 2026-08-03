@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
 import ChipBar from '../components/ChipBar';
 import VideoGrid from '../components/VideoGrid';
 import axios from 'axios'
@@ -8,11 +6,12 @@ import axios from 'axios'
 function Home() {
 
   const [allVideos, setallVideos] = useState([])
-
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
     const fetchAllVideos = async () => {
       try {
+        setLoading(true)
         const response = await axios.get('http://localhost:3000/api/v1/videos/get-all',
           {
             withCredentials: true
@@ -26,15 +25,17 @@ function Home() {
       } catch (error) {
         console.log(error.response?.status);
         console.log(error.response?.data);
+      } finally {
+        setLoading(false)
       }
     }
-    fetchAllVideos()
+     fetchAllVideos()
   }, [])
 
   return (
     <>
       <ChipBar />
-      <VideoGrid videos={allVideos} />
+      <VideoGrid videos={allVideos} loading={loading} />
     </>
   );
 }
