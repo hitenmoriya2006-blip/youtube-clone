@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import api from '@/api/axios';
+import EmptyPlaylist from '@/components/empty-states/EmptyPlaylist';
+import PlaylistSkeleton from '@/skeleton/PlayListSkeleton';
 
 const Playlists = () => {
   // Use these to test the loading and empty states
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
   const [playlist, setPlaylist] = useState([])
 
@@ -14,35 +16,37 @@ const Playlists = () => {
   const [playlistTitle, setPlaylistTitle] = useState('');
   const [playlistDesc, setPlaylistDesc] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  
+
   // Delete Popup state
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [playlistToDelete, setPlaylistToDelete] = useState(null);
-  
+
   const { register, handleSubmit, reset, formState: { errors }, setError } = useForm()
 
   useEffect(() => {
     const getUserPlaylist = async () => {
       try {
+        setIsLoading(true)
         const response = await api.get('/playlist/user',
           {
             withCredentials: true
           }
         )
         if (response) setPlaylist(response.data.data)
-        
+
       } catch (error) {
         console.log(error);
         console.log(error.response?.status);
         console.log(error.response?.data);
+      } finally {
+        setIsLoading(false)
       }
     }
     getUserPlaylist()
   }, [])
 
   const createPlayList = async (data) => {
-    console.log('start');
-
+   
     try {
       const response = await api.post('/playlist/create',
         data,
@@ -60,22 +64,6 @@ const Playlists = () => {
     reset()
   }
 
-  const PlaylistSkeleton = () => (
-    <div className="flex flex-col gap-3">
-      <div className="aspect-video w-full rounded-xl bg-surface-container-high animate-pulse"></div>
-      <div className="flex justify-between items-start pt-1">
-        <div className="flex flex-col gap-2 w-full pr-4">
-          <div className="h-5 w-3/4 bg-surface-container-high rounded animate-pulse"></div>
-          <div className="h-4 w-full bg-surface-container-high rounded animate-pulse"></div>
-          <div className="flex gap-4 mt-1">
-            <div className="h-3 w-16 bg-surface-container-high rounded animate-pulse"></div>
-            <div className="h-3 w-24 bg-surface-container-high rounded animate-pulse"></div>
-          </div>
-        </div>
-        <div className="w-6 h-6 rounded-full bg-surface-container-high animate-pulse"></div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="bg-background min-h-screen text-on-background font-body-lg">
@@ -102,39 +90,21 @@ const Playlists = () => {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <PlaylistSkeleton key={item} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <PlaylistSkeleton key={index} />
             ))}
           </div>
         )}
 
         {/* Empty State */}
-        {!isLoading && isEmpty && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-32 h-32 mb-6 rounded-full bg-surface-container-high flex items-center justify-center">
-              <span className="material-symbols-outlined text-6xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                playlist_play
-              </span>
-            </div>
-            <h2 className="text-headline-lg font-headline-lg text-on-surface mb-3">
-              No playlists created yet
-            </h2>
-            <p className="text-body-md text-secondary max-w-md mb-8">
-              Save your favorite videos or organize content by topics. Playlists make it easy to find what you're looking for later.
-            </p>
-            <button
-              onClick={() => setIsCreatePopupOpen(true)}
-              className="flex items-center gap-2 px-8 py-3 bg-surface-container-highest text-on-surface font-label-lg rounded-full hover:bg-surface-variant transition-colors border border-outline/20"
-            >
-              <span className="material-symbols-outlined">add</span>
-              Create your first playlist
-            </button>
-          </div>
+        {playlist.length ===0 && (
+         
+          <EmptyPlaylist />
         )}
 
         {/* Playlists Grid */}
-        {!isLoading && !isEmpty && (
+        {!isLoading  && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10">
             {playlist.map((p) => (
               <Link to={`/playlists/${p._id}`}>
@@ -145,9 +115,9 @@ const Playlists = () => {
                       p.videos?.length === 0 ?
                         <div className='text-white text-center'>Playlist is Empty</div> :
                         <img
-                          src={p.videos?.[0]?.thumbnail ?p.videos?.[0]?.thumbnail : 
+                          src={p.videos?.[0]?.thumbnail ? p.videos?.[0]?.thumbnail :
                             'https://images.openai.com/static-rsc-4/UEsPB_FDurvL9hMCC4ayTb-9EPKtTjpHSxZxlheF2-GsaPbcRVRgYNIK0jcQR_VJY8XYFxY492Y-9DbqwbUhxZL2Tm_4hOHiuCj30DylPYrI-uryAVBBG9NQH47y-cCVdUIvDq4k96Um9zpiQ4YcqyX9HEaztcAlc7QvVlNfYj2G7DgmWC_hKNDE_2bM7PgD?purpose=fullsize'
-                           }
+                          }
                           alt={'playlist is empty'}
                           className="w-full h-full object-cover transition-opacity text-center duration-300"
                         />
@@ -180,7 +150,7 @@ const Playlists = () => {
 
                     {/* Action Menu */}
                     <div className="relative">
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.preventDefault();
                           setActiveDropdown(activeDropdown === p._id ? null : p._id);
@@ -193,7 +163,7 @@ const Playlists = () => {
                       {/* Dropdown Menu */}
                       {activeDropdown === p._id && (
                         <div className="absolute right-0 top-full mt-1 w-40 bg-surface-container-highest rounded-lg shadow-xl border border-white/5 py-1 z-50">
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.preventDefault();
                               setPlaylistToDelete(p);
@@ -223,8 +193,8 @@ const Playlists = () => {
             {/* Modal Header */}
             <div className="px-5 py-4 flex items-center justify-between border-b border-outline-variant/30">
               <h2 className="font-headline-md text-headline-md text-on-surface">Create Playlist</h2>
-              <button 
-                className="p-2 rounded-full hover:bg-surface-container-highest transition-colors" 
+              <button
+                className="p-2 rounded-full hover:bg-surface-container-highest transition-colors"
                 onClick={() => setIsCreatePopupOpen(false)}
               >
                 <span className="material-symbols-outlined text-on-surface-variant">close</span>
@@ -235,69 +205,68 @@ const Playlists = () => {
             <div className="p-5 space-y-5 max-h-[716px] overflow-y-auto custom-scrollbar">
               <form onSubmit={handleSubmit(createPlayList)}>
 
-              {/* Title Field */}
-              <div className="space-y-1.5 group mb-4">
-                <div className="flex justify-between items-center">
-                  <label className="font-label-lg text-label-lg text-on-surface-variant group-focus-within:text-primary-container transition-colors">
-                    Title (required)
-                  </label>
-                  <span className={`font-label-sm text-label-sm ${playlistTitle.length >= 100 ? 'text-error' : 'text-on-surface-variant/60'}`}>
-                    {playlistTitle.length}/100
-                  </span>
+                {/* Title Field */}
+                <div className="space-y-1.5 group mb-4">
+                  <div className="flex justify-between items-center">
+                    <label className="font-label-lg text-label-lg text-on-surface-variant group-focus-within:text-primary-container transition-colors">
+                      Title (required)
+                    </label>
+                    <span className={`font-label-sm text-label-sm ${playlistTitle.length >= 100 ? 'text-error' : 'text-on-surface-variant/60'}`}>
+                      {playlistTitle.length}/100
+                    </span>
+                  </div>
+                  <input
+                    {...register('title')}
+                    className={`w-full bg-surface-container-lowest border-2 rounded-lg py-2.5 px-4 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none transition-all ${!playlistTitle.trim() && playlistTitle.length > 0 ? 'border-error focus:border-error' : 'border-outline-variant/30 focus:border-primary-container'
+                      }`}
+                    maxLength="100"
+                    placeholder="Add a title that describes your playlist"
+                    value={playlistTitle}
+                    onChange={(e) => setPlaylistTitle(e.target.value)}
+                    type="text"
+                  />
                 </div>
-                <input 
-                 {...register('title')}
-                  className={`w-full bg-surface-container-lowest border-2 rounded-lg py-2.5 px-4 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none transition-all ${
-                    !playlistTitle.trim() && playlistTitle.length > 0 ? 'border-error focus:border-error' : 'border-outline-variant/30 focus:border-primary-container'
-                  }`}
-                  maxLength="100" 
-                  placeholder="Add a title that describes your playlist" 
-                  value={playlistTitle}
-                  onChange={(e) => setPlaylistTitle(e.target.value)}
-                  type="text" 
-                />
-              </div>
 
-              {/* Description Field */}
-              <div className="space-y-1.5 group mb-4">
-                <div className="flex justify-between items-center">
-                  <label className="font-label-lg text-label-lg text-on-surface-variant group-focus-within:text-primary-container transition-colors">
-                    Description
-                  </label>
-                  <span className={`font-label-sm text-label-sm ${playlistDesc.length >= 5000 ? 'text-error' : 'text-on-surface-variant/60'}`}>
-                    {playlistDesc.length}/5000
-                  </span>
+                {/* Description Field */}
+                <div className="space-y-1.5 group mb-4">
+                  <div className="flex justify-between items-center">
+                    <label className="font-label-lg text-label-lg text-on-surface-variant group-focus-within:text-primary-container transition-colors">
+                      Description
+                    </label>
+                    <span className={`font-label-sm text-label-sm ${playlistDesc.length >= 5000 ? 'text-error' : 'text-on-surface-variant/60'}`}>
+                      {playlistDesc.length}/5000
+                    </span>
+                  </div>
+                  <textarea
+                    {...register('description')}
+                    className="w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-lg py-2.5 px-4 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container transition-all resize-none custom-scrollbar"
+                    maxLength="5000"
+                    placeholder="Tell viewers about your playlist"
+                    rows="3"
+                    value={playlistDesc}
+                    onChange={(e) => setPlaylistDesc(e.target.value)}
+                  ></textarea>
                 </div>
-                <textarea 
-                 {...register('description')}
-                  className="w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-lg py-2.5 px-4 text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary-container transition-all resize-none custom-scrollbar"
-                  maxLength="5000" 
-                  placeholder="Tell viewers about your playlist" 
-                  rows="3"
-                  value={playlistDesc}
-                  onChange={(e) => setPlaylistDesc(e.target.value)}
-                ></textarea>
-              </div>
 
-              <div className="px-5 py-3 bg-surface-container-highest/50 flex justify-end items-center gap-3">
-              <button 
-                className="px-5 py-2 rounded-full font-label-lg text-label-lg text-primary hover:bg-primary/10 transition-all active:scale-95" 
-                onClick={() => setIsCreatePopupOpen(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                className="px-5 py-2 rounded-full font-label-lg text-label-lg bg-primary-container text-on-primary-container font-bold hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-primary-container/20 flex items-center justify-center min-w-[80px]" 
-                type='submit'
-                disabled={isCreating}
-              >
-                {isCreating ? (
-                  <span className="material-symbols-outlined animate-spin">sync</span>
-                ) : (
-                  'Create'
-                )}
-              </button>
-            </div>
+                <div className="px-5 py-3 bg-surface-container-highest/50 flex justify-end items-center gap-3">
+                  <button
+                    className="px-5 py-2 rounded-full font-label-lg text-label-lg text-primary hover:bg-primary/10 transition-all active:scale-95"
+                    onClick={() => setIsCreatePopupOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-5 py-2 rounded-full font-label-lg text-label-lg bg-primary-container text-on-primary-container font-bold hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-primary-container/20 flex items-center justify-center min-w-[80px]"
+                    type='submit'
+                    disabled={isCreating}
+                  >
+                    {isCreating ? (
+                      <span className="material-symbols-outlined animate-spin">sync</span>
+                    ) : (
+                      'Create'
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
@@ -315,7 +284,7 @@ const Playlists = () => {
               </p>
             </div>
             <div className="px-6 py-4 bg-surface-container-highest/50 flex justify-end items-center gap-3">
-              <button 
+              <button
                 onClick={(e) => {
                   e.preventDefault();
                   setPlaylistToDelete(null);
@@ -324,7 +293,7 @@ const Playlists = () => {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={async (e) => {
                   e.preventDefault();
                   try {

@@ -16,6 +16,7 @@ const VideoPlayer = ({ src, poster, title }) => {
       poster={poster}
       aspectRatio="16/9"
       playsInline
+      autoPlay
       crossOrigin="anonymous"
     >
       <MediaProvider />

@@ -20,6 +20,8 @@ const WatchHistory = () => {
           withCredentials: true
         }
       )
+
+      fetchWatchedHistory()
     } catch (error) {
       console.log(error);
     }
@@ -44,8 +46,8 @@ const WatchHistory = () => {
 
   const isEmpty = historyData.length === 0
 
-  useEffect(() => {
-    const fetchWatchedHistory = async () => {
+
+  const fetchWatchedHistory = async () => {
       try {
         setLoading(true)
         const response = await api.get('/users/history',
@@ -60,6 +62,8 @@ const WatchHistory = () => {
         setLoading(false)
       }
     }
+
+  useEffect(() => {
     fetchWatchedHistory()
   }, [])
 

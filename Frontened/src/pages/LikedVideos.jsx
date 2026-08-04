@@ -4,6 +4,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { toast } from 'sonner'
 import LikedVideoSkeleton from '@/skeleton/LikedVideoSkeleton';
 import api from '@/api/axios';
+import EmptyLikedVideos from '@/components/empty-states/EmptyLikedVideos';
 
 
 const LikedVideos = () => {
@@ -157,7 +158,7 @@ const LikedVideos = () => {
           </div>
           ) :
          likedVideos.length === 0 ? (
-          <div>No liked video !</div>
+          <EmptyLikedVideos />
          ) : (
            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
             {

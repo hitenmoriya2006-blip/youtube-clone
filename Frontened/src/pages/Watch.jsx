@@ -22,7 +22,7 @@ const Watch = () => {
   const [commentLoading, setCommentLoading] = useState(true)
   const navigate = useNavigate()
 
-
+  
   const [isSavePopupOpen, setIsSavePopupOpen] = useState(false);
   const [replyingToId, setReplyingToId] = useState(null);
   const [replyContent, setReplyContent] = useState("");
@@ -60,14 +60,8 @@ const Watch = () => {
             withCredentials: true
           }
         )
-        if (response) {
-          const commentsWithMockState = response.data.data.docs.map(c => ({
-            ...c,
-            isLiked: false,
-            likesCount: 0
-          }));
-          setAllComments(commentsWithMockState)
-        }
+
+        if(response) setAllComments(response.data.data.docs)
       } catch (error) {
         console.log(error.response?.status);
         console.log(error.response?.data);
@@ -141,8 +135,7 @@ const Watch = () => {
             withCredentials: true
           }
         )
-        console.log(response.data.data);
-
+        
         if (response) {
           setsuggestedVideos(response.data.data)
         }
@@ -217,7 +210,7 @@ const Watch = () => {
       setComment('')
       setIsFocused(false)
       if (response.data?.data) {
-        const newComment = { ...response.data.data, isLiked: false, likesCount: 0 };
+        const newComment = { ...response.data.data};
         setAllComments(prev => [newComment, ...prev]);
       }
     } catch (error) {
@@ -227,8 +220,7 @@ const Watch = () => {
   }
 
   const handleLikeComment = async (commentId) => {
-    console.log(commentId);
-
+    
     setAllComments(prev => prev.map(c => {
       if (c._id === commentId) {
         const wasLiked = c.isLiked;
@@ -581,12 +573,10 @@ const Watch = () => {
 
           {/* Sidebar (Recommendations) */}
           <div className="w-full lg:w-[400px] flex flex-col gap-3">
-            {/* Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <button className="px-3 py-1.5 bg-on-surface text-surface rounded-lg text-label-lg font-bold whitespace-nowrap">All</button>
-              <button className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded-lg text-label-lg font-bold whitespace-nowrap hover:bg-surface-variant transition-colors">From Nexus Tech Lab</button>
-              <button className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded-lg text-label-lg font-bold whitespace-nowrap hover:bg-surface-variant transition-colors">PC Building</button>
-              <button className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded-lg text-label-lg font-bold whitespace-nowrap hover:bg-surface-variant transition-colors">Hardware</button>
+            Filters
+            <div  className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <button onClick={() =>  navigate(`/`)} className="px-3 py-1.5 bg-on-surface text-surface rounded-lg text-label-lg font-bold whitespace-nowrap">All</button>
+              <button onClick={() =>  navigate(`/channel/${video?.owner?.username}`)} className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded-lg text-label-lg font-bold whitespace-nowrap hover:bg-surface-variant transition-colors">From {video?.owner?.fullName}</button>
             </div>
             {/* Related Videos */}
             <div className="flex flex-col gap-3">

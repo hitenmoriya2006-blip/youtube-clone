@@ -5,16 +5,20 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner'
 import { updateUser } from "@/features/auth/authSlice";
 import api from "@/api/axios";
+import { Badge } from "@/components/ui/badge"
+import { Spinner } from "@/components/ui/spinner"
 
 const EditProfile = () => {
 
     const { register, reset, handleSubmit, formState: { errors, dirtyFields } } = useForm()
     const user = useSelector((state) => state.auth.user)
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [loadingText, setLoadingText] = useState("");
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
     console.log(user);
-    
+
 
     useEffect(() => {
         reset({
@@ -26,7 +30,6 @@ const EditProfile = () => {
     }, [user, reset]);
 
     const updateAccountDetail = async (data) => {
-        console.log(data);
         try {
             await api.patch(
                 "/users/update-account",
@@ -68,6 +71,10 @@ const EditProfile = () => {
         formData.append("avatar", file);
 
         try {
+            setLoadingText("Updating profile photo...");
+            setIsUpdating(true);
+            console.log('updating');
+
             const response = await api.patch(
                 "/users/avatar",
                 formData,
@@ -83,6 +90,8 @@ const EditProfile = () => {
                 error.response?.data?.message || "Something went wrong!"
             );
             console.log(error);
+        } finally {
+            setIsUpdating(false)
         }
     };
 
@@ -95,6 +104,8 @@ const EditProfile = () => {
         formData.append("coverImage", file);
 
         try {
+            setLoadingText("Updating cover photo...");
+            setIsUpdating(true);
             const response = await api.patch(
                 "/users/cover-image",
                 formData,
@@ -110,11 +121,39 @@ const EditProfile = () => {
                 error.response?.data?.message || "Something went wrong!"
             );
             console.log(error);
+        } finally {
+            setIsUpdating(false);
         }
     };
 
+    useEffect(() => {
+        console.log(isUpdating);
+
+    }, [isUpdating])
+
     return (
         <div className="min-h-screen bg-zinc-950 text-white">
+
+            {
+                isUpdating && (
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-md">
+                        <div className="flex min-w-[280px] items-center gap-4 rounded-2xl border border-white/10 bg-background px-6 py-5 shadow-2xl">
+                            <Spinner className="size-5" />
+
+                            <div className="flex flex-col">
+                                <p className="font-medium text-foreground">
+                                    {loadingText}
+                                </p>
+
+                                <p className="text-sm text-muted-foreground">
+                                    Please wait...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
             <div className="max-w-7xl mx-auto px-6 py-10">
 
                 <button onClick={() => navigate('/profile')}
@@ -346,11 +385,11 @@ const EditProfile = () => {
                             focus:border-red-500
                             transition"
                         />
-                          {errors.description && (
-                                <p className="text-red-500 text-sm mt-2">
-                                    {errors.description.message}
-                                </p>
-                            )}
+                        {errors.description && (
+                            <p className="text-red-500 text-sm mt-2">
+                                {errors.description.message}
+                            </p>
+                        )}
 
                         <p className="text-sm text-zinc-500 mt-3">
                             Share what your channel is about, what you create, and why people should subscribe.
