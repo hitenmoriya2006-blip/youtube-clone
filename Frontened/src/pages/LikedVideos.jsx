@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { formatDistanceToNowStrict } from "date-fns";
+import { Link } from 'react-router-dom';
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 import { toast } from 'sonner'
 import LikedVideoSkeleton from '@/skeleton/LikedVideoSkeleton';
 import api from '@/api/axios';
@@ -31,41 +31,6 @@ const LikedVideos = () => {
     }
     fetchLikedVideo()
   }, [])
-
-  const timeAgo = (date) => {
-    if (!date || isNaN(new Date(date).getTime())) {
-      return "";
-    }
-
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
-
-  const formatDuration = (duration) => {
-    const totalSeconds = Math.floor(duration);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
-
-  useEffect(() => {
-    console.log(loading);
-
-  }, [loading])
-
-
 
   return (
     <div className="bg-background min-h-screen text-on-surface font-body-md">

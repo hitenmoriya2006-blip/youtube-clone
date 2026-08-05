@@ -1,34 +1,10 @@
 import React from 'react';
-import { formatDistanceToNowStrict } from "date-fns";
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 import { useNavigate } from 'react-router-dom';
 
 const VideoCard = ({ _id,title, views, duration, avatar, thumbnail, isLive, owner, createdAt }) => {
 
   const navigate = useNavigate()
-
-  const formatDuration = (duration) => {
-    const totalSeconds = Math.floor(duration);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
-
-  const timeAgo = (date) => {
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
 
   return (
     <div onClick={() =>{navigate(`/watch/${_id}`)}}  className="flex flex-col gap-3 cursor-pointer w-full rounded-xl p-2.5 transition-colors duration-300 hover:bg-surface-container-highest">

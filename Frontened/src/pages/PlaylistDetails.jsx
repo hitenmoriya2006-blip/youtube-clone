@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { formatDistanceToNowStrict } from "date-fns";
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 import { useForm } from 'react-hook-form';
 import api from '@/api/axios';
+import { toast } from 'sonner'
 
 const PlaylistDetails = () => {
 
@@ -36,7 +37,7 @@ const PlaylistDetails = () => {
         }
       )
       setIsEditPlaylistOpen(false)
-      if (response) alert('playlist updated !!')
+      if (response) toast.success('playlist updated !!')
     } catch (error) {
       console.log(error);
     }
@@ -50,8 +51,11 @@ const PlaylistDetails = () => {
           withCredentials:true
         }
       )
+       toast.success('Video removed')
+       fetchedPLaylist()
     } catch (error) {
       console.log(error);
+      toast.error(error.response?.data?.message)
     }
   }
 
@@ -70,8 +74,7 @@ const PlaylistDetails = () => {
     }
   }
 
-  useEffect(() => {
-    const fetchedPLaylist = async () => {
+  const fetchedPLaylist = async () => {
       try {
         const response = await api.get(`/playlist/${playlistId}`, {
           withCredentials: true
@@ -90,42 +93,10 @@ const PlaylistDetails = () => {
         console.log(error.response?.data);
       }
     }
-    fetchedPLaylist()
-  }, [playlistId,reset])
 
   useEffect(() => {
-    console.log(playlist);
-    console.log(playlistVideos);
-
-  }, [playlist, playlistVideos])
-
-  const timeAgo = (date) => {
-    if (!date || isNaN(new Date(date).getTime())) {
-      return "";
-    }
-
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
-
-  const formatDuration = (duration) => {
-    const totalSeconds = Math.floor(duration);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
+    fetchedPLaylist()
+  }, [playlistId,reset])
 
 
   // Skeletons
@@ -179,12 +150,7 @@ const PlaylistDetails = () => {
           <>
             {/* Playlist Header (Cinematic Banner Enhanced) */}
             <div className="flex flex-col md:flex-row gap-8 mb-10 bg-surface-container-low p-6 md:p-8 rounded-2xl border border-outline/10 relative overflow-hidden">
-              {/* Blurred Background effect */}
-              {/* <div
-                className="absolute inset-0 opacity-10 blur-3xl saturate-200 pointer-events-none"
-                style={{ backgroundImage: `url(${playlist[0]?.video[0]?.thumbnail})`, backgroundSize: 'cover' }}
-              ></div> */}
-
+          
               {/* Cover Image */}
               <div className="w-full md:w-[400px] xl:w-[480px] aspect-video rounded-xl overflow-hidden flex-shrink-0 shadow-2xl relative z-10 group">
                 <img

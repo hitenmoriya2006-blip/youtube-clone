@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { formatDistanceToNowStrict } from "date-fns";
 import HistoryVideoSkeleton from '@/skeleton/HistoryVideoSkeleton';
 import { toast } from 'sonner'
 import api from '@/api/axios';
-
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 
 
 const WatchHistory = () => {
@@ -46,7 +45,6 @@ const WatchHistory = () => {
 
   const isEmpty = historyData.length === 0
 
-
   const fetchWatchedHistory = async () => {
       try {
         setLoading(true)
@@ -66,34 +64,6 @@ const WatchHistory = () => {
   useEffect(() => {
     fetchWatchedHistory()
   }, [])
-
-  const formatDuration = (duration) => {
-    const totalSeconds = Math.floor(duration);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
-
-  const timeAgo = (date) => {
-    if (!date || isNaN(new Date(date).getTime())) {
-      return "";
-    }
-
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
 
   return (
     <div className="bg-background min-h-screen text-on-background font-body-md">

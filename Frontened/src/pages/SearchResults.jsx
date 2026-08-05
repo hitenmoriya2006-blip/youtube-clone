@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { formatDistanceToNowStrict } from "date-fns";
 import api from '@/api/axios';
 import SearchVideoSkeleton from '@/skeleton/SearchVideoSkeleton';
 import EmptySearch from '@/components/empty-states/EmptySearch';
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 
 const SearchResults = () => {
   const chips = ['All', 'Recent', 'Tech', 'AI', 'Tutorials', 'Gaming', 'Review'];
@@ -36,76 +36,6 @@ const SearchResults = () => {
 
     fetchSearchedVideo()
   }, [query])
-
-  const timeAgo = (date) => {
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
-
-  const formatDuration = (duration) => {
-    const totalSeconds = Math.floor(duration);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
-
-  //   {
-  //     title: "Inside the Nexus Tech Lab: 2024 AI Evolution & Architecture Deep Dive",
-  //     thumbnail: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
-  //     duration: "15:42",
-  //     views: "1.2M views",
-  //     time: "2 days ago",
-  //     channelAvatar: "https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg",
-  //     channelName: "Nexus Tech Lab",
-  //     description: "Explore the cutting-edge infrastructure powering our latest AI models. From liquid-cooled server racks to neural processing units, we're building the future of computation.",
-  //     badges: ["4K", "CC"]
-  //   },
-  //   {
-  //     title: "Mastering Neural Pipelines: A Step-by-Step Developer Tutorial",
-  //     thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800",
-  //     duration: "08:20",
-  //     views: "850K views",
-  //     time: "5 days ago",
-  //     channelAvatar: "https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg",
-  //     channelName: "Nexus Tech Lab",
-  //     description: "Learn how to optimize your data processing pipelines for maximum efficiency. We walk through the exact tech stack used in our lab for real-time inference.",
-  //     badges: ["4K"]
-  //   },
-  //   {
-  //     title: "Quantum Computing: Breaking the Efficiency Barrier in 2024",
-  //     thumbnail: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800",
-  //     duration: "22:15",
-  //     views: "2.4M views",
-  //     time: "1 week ago",
-  //     channelAvatar: "https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg",
-  //     channelName: "Nexus Tech Lab",
-  //     description: "We push the limits of what's possible with our new quantum processor prototype. This breakthrough could redefine how we approach complex cryptographic problems.",
-  //     badges: ["4K", "CC"]
-  //   },
-  //   {
-  //     title: "Nexus Studio Tour: Building the Ultimate Creator Environment",
-  //     thumbnail: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800",
-  //     duration: "12:10",
-  //     views: "450K views",
-  //     time: "3 weeks ago",
-  //     channelAvatar: "https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg",
-  //     channelName: "Nexus Tech Lab",
-  //     description: "Take a look behind the scenes at where the magic happens. We've optimized every square inch for maximum creative flow and technological integration.",
-  //     badges: ["4K"]
-  //   }
-  // ];
 
   return (
     <div className="bg-background min-h-screen text-on-background font-body-lg">

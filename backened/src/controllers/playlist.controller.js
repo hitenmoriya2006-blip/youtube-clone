@@ -109,9 +109,6 @@ const getPlaylistByUsername = asyncHandler(async (req, res) => {
         select:'thumbnail'
     })
 
-    console.log(`playylist ${playList}`);
-    
-
     if (playList?.length === 0) {
         return res
             .status(200)
