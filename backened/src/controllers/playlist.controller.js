@@ -4,6 +4,7 @@ import { playlistModel } from "../models/playlist.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { userModel } from "../models/user.model.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
     const { title, description } = req.body
@@ -67,10 +68,51 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         select:'thumbnail'
     })
 
-    console.log(playList);
-
-
     if (playList.length === 0) {
+        return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                [],
+                'no playlist found'
+            ))
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            playList,
+            'playlist fetched successfully'
+        ))
+})
+
+const getPlaylistByUsername = asyncHandler(async (req, res) => {
+    const {username} = req.params
+
+    if (!username) {
+        throw new ApiError(400, 'username is required')
+    }
+
+    const user = await  userModel.findOne({
+        username:username
+    })
+
+    if(!user){
+        throw new ApiError(404,'user not found')
+    }
+
+    const playList = await playlistModel.find({
+        owner: user._id
+    }).populate({
+        path:'videos',
+        select:'thumbnail'
+    })
+
+    console.log(`playylist ${playList}`);
+    
+
+    if (playList?.length === 0) {
         return res
             .status(200)
             .json(new ApiResponse(
@@ -345,5 +387,6 @@ export {
     addVideoToPlaylist,
     removeVideoFromPlaylist,
     updatePlaylist,
-    deletePlaylist
+    deletePlaylist,
+    getPlaylistByUsername
 }

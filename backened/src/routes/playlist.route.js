@@ -7,7 +7,8 @@ import {
     addVideoToPlaylist,
     deletePlaylist,
     removeVideoFromPlaylist,
-    updatePlaylist
+    updatePlaylist,
+    getPlaylistByUsername
 } from '../controllers/playlist.controller.js'
 
 const router = express.Router()
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 router.route('/create').post(authMiddleware,createPlaylist)
 router.route('/user').get(authMiddleware,getUserPlaylists)
 router.route('/:playlistId').get(getPlaylistById)
+router.route('/c/:username').get(getPlaylistByUsername)
 router.route('/add/:videoId/:playlistId').patch(addVideoToPlaylist)
 router.route('/delete/:playlistId').delete(deletePlaylist)
 router.route('/remove/:videoId/:playlistId').patch(removeVideoFromPlaylist)

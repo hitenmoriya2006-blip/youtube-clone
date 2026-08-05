@@ -8,7 +8,7 @@ import PlaylistSkeleton from '@/skeleton/PlayListSkeleton';
 const Playlists = () => {
   // Use these to test the loading and empty states
   const [isLoading, setIsLoading] = useState(true);
-  const [isEmpty, setIsEmpty] = useState(false);
+  // const [isEmpty, setIsEmpty] = useState(false);
   const [playlist, setPlaylist] = useState([])
 
   // Popup state

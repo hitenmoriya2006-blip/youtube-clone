@@ -52,15 +52,14 @@ const Channel = () => {
       }
     }
 
-    const getUserPlaylist = async () => {
+    const getChannelPlaylist = async () => {
       try {
-        const response = await api.get('/playlist/user',
+        const response = await api.get(`/playlist/c/${username}`,
           {
             withCredentials: true
           }
         )
-        if (response) setPlaylist(response.data.data)
-
+        if (response) setPlaylist(response.data.data) 
       } catch (error) {
         console.log(error);
         console.log(error.response?.status);
@@ -70,7 +69,7 @@ const Channel = () => {
 
     fetchChannelData()
     fetchVideos()
-    getUserPlaylist()
+    getChannelPlaylist()
   }, [username])
 
   const toggleSubscription = async () => {
