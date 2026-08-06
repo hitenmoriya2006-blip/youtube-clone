@@ -52,10 +52,10 @@ const Signup = () => {
         <div className="hidden md:flex flex-col max-w-sm">
           <div className="flex items-center gap-1 mb-6">
             <span className="material-symbols-outlined text-primary-container text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-            <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">YouTube</h1>
+            <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">YouTify</h1>
           </div>
           <h2 className="font-display-lg text-display-lg mb-4 text-on-surface leading-tight">Create your account</h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">Continue to YouTube to watch your favorite creators, save playlists, and join the conversation.</p>
+          <p className="font-body-lg text-body-lg text-on-surface-variant">Continue to Youtify to watch your favorite creators, save playlists, and join the conversation.</p>
           {/* <div className="mt-12 overflow-hidden rounded-xl aspect-video glass-panel relative group">
             <div className="w-full h-full bg-cover bg-center opacity-60 group-hover:scale-105 transition-transform duration-700" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtVvRgWk9zvuyn4UU_AEfl7qx-pa0CFHntJjQ0wrOoQFxjvFTdB8H01EoLEQBz13RPlU_6-FIBg_quHnp_e3P65oRNwxRrhhW0ATHExagCaX2lszPcM5oV8gV2VA933qfl_-RXRLj1xOTAZOvoPnJIEUy89CsCKHCVaWV0jdmar49jjYJkK6T_HqC9ENerhWkL6yUdkJCYUniEM99_JZRXvAJhWYsh9HcodJfr0N1k9RsQpNLhwCw')" }}></div>
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
@@ -68,7 +68,7 @@ const Signup = () => {
           <div className="md:hidden flex flex-col items-center mb-8">
             <div className="flex items-center gap-1 mb-2">
               <span className="material-symbols-outlined text-primary-container text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-              <span className="font-headline-lg text-headline-lg font-bold">YouTube</span>
+              <span className="font-headline-lg text-headline-lg font-bold">YouTify</span>
             </div>
             <h2 className="font-headline-lg text-headline-lg">Create account</h2>
           </div>

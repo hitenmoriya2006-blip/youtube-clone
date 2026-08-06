@@ -26,7 +26,7 @@ const Header = ({ onMenuClick }) => {
         </button>
         <div onClick={() => navigate('/')} className="flex items-center gap-0.5 cursor-pointer">
           <span className="material-symbols-outlined text-[28px] text-[#ff0000]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-          <span className="font-headline-lg text-headline-lg tracking-[-0.5px] text-on-surface">YouTube</span>
+          <span className="font-headline-lg text-headline-lg tracking-[-0.5px] text-on-surface">Youtify</span>
         </div>
       </div>
 

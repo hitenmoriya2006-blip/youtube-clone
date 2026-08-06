@@ -46,12 +46,12 @@ const Login = () => {
 
           <div className="flex justify-center items-center gap-1 mb-6">
             <span className="material-symbols-outlined text-primary-container text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
-            <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">YouTube</h1>
+            <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">Youtify</h1>
           </div>
 
           <div className="flex flex-col justify-center items-center gap-1 mb-6">
             <h1 className='text-xl font-medium tracking-wide'>Sign in</h1>
-            <p className='text-on-surface-variant font-label-lg transition-all text-sm'>continue to youtube</p>
+            <p className='text-on-surface-variant font-label-lg transition-all text-sm'>continue to youtify</p>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit(loginAccount)}>
