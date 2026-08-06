@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios'
 
 const Sidebar = ({ isOpen }) => {
 
   const [subscribedChannel, setSubscribedChannel] = useState([])
-  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchedSubscribedChannels = async () => {

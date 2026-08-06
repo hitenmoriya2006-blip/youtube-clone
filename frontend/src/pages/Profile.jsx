@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { formatDistanceToNowStrict } from "date-fns";
 import { logout } from '../features/auth/authSlice';
 import { useSelector, useDispatch } from 'react-redux';
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner'
@@ -59,34 +60,6 @@ const Profile = () => {
         }
         channelVideosData()
     }, [channelVideos])
-
-    const timeAgo = (date) => {
-        if (!date || isNaN(new Date(date).getTime())) {
-            return "";
-        }
-
-        return formatDistanceToNowStrict(new Date(date), {
-            addSuffix: true,
-        });
-    };
-
-    const formatDuration = (duration) => {
-        const totalSeconds = Math.floor(duration);
-
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        if (hours > 0) {
-            return `${hours}:${minutes
-                .toString()
-                .padStart(2, "0")}:${seconds
-                    .toString()
-                    .padStart(2, "0")}`;
-        }
-
-        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-    };
 
     const logoutAccount = async () => {
         try {

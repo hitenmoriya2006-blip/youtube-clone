@@ -17,9 +17,6 @@ const EditProfile = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    console.log(user);
-
-
     useEffect(() => {
         reset({
             fullName: user?.fullName,
@@ -73,8 +70,7 @@ const EditProfile = () => {
         try {
             setLoadingText("Updating profile photo...");
             setIsUpdating(true);
-            console.log('updating');
-
+           
             const response = await api.patch(
                 "/users/avatar",
                 formData,
@@ -125,11 +121,6 @@ const EditProfile = () => {
             setIsUpdating(false);
         }
     };
-
-    useEffect(() => {
-        console.log(isUpdating);
-
-    }, [isUpdating])
 
     return (
         <div className="min-h-screen bg-zinc-950 text-white">

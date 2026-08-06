@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import api from '@/api/axios';
 import EmptyPlaylist from '@/components/empty-states/EmptyPlaylist';
 import PlaylistSkeleton from '@/skeleton/PlayListSkeleton';
+import { toast } from 'sonner';
 
 const Playlists = () => {
   // Use these to test the loading and empty states
@@ -54,7 +55,7 @@ const Playlists = () => {
           withCredentials: true
         }
       )
-      if (response) console.log('playlist created');
+      if (response) toast.success('playlist created');
       setIsCreatePopupOpen(false)
     } catch (error) {
       console.log(error);

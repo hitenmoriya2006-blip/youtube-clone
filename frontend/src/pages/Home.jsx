@@ -19,8 +19,6 @@ function Home() {
 
         if (response) {
           setallVideos(response.data.data.allVideos)
-          console.log(allVideos);
-
         }
       } catch (error) {
         console.log(error.response?.status);

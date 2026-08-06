@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import SuggestedVideoSkeleton from '@/skeleton/SuggestedVideoSkeleton';
 import CommentSkeleton from '@/skeleton/CommentSkeleton';
 import VideoPlayer from '@/components/VideoPlayer';
+import { formatDuration, timeAgo } from '../utils/formatter.js'
 import api from '@/api/axios';
 
 const Watch = () => {
@@ -119,12 +120,6 @@ const Watch = () => {
     }
   }
 
-  const timeAgo = (date) => {
-    return formatDistanceToNowStrict(new Date(date), {
-      addSuffix: true,
-    });
-  };
-
   useEffect(() => {
 
     const fetchRelatedVideos = async () => {
@@ -179,24 +174,6 @@ const Watch = () => {
     userInfoFetched()
     fetchedPlaylist()
   }, [])
-
-  const formatDuration = (duration) => {
-    const totalSeconds = Math.floor(duration);
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
 
   const addComment = async () => {
     try {

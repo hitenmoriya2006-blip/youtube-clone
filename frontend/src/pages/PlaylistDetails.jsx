@@ -76,6 +76,7 @@ const PlaylistDetails = () => {
 
   const fetchedPLaylist = async () => {
       try {
+        setIsLoading(true)
         const response = await api.get(`/playlist/${playlistId}`, {
           withCredentials: true
         })
@@ -91,6 +92,8 @@ const PlaylistDetails = () => {
       } catch (error) {
         console.log(error.response?.status);
         console.log(error.response?.data);
+      } finally {
+        setIsLoading(false)
       }
     }
 
