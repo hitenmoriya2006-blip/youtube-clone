@@ -116,17 +116,18 @@ const loginUser = asyncHandler(async (req, res) => {
 
    const accessOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000
    }
 
    const refreshOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 10 * 24 * 60 * 60 * 1000 // 10 days
+      secure: true,
+      sameSite: "none",
+      maxAge: 10 * 24 * 60 * 60 * 1000
    }
+
    res
       .status(200)
       .cookie('accessToken', accessToken, accessOptions)
@@ -191,16 +192,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
       const accessOptions = {
          httpOnly: true,
-         secure: process.env.NODE_ENV === "production",
-         sameSite: "lax",
-         maxAge: 24 * 60 * 60 * 1000 // 1 day
+         secure: true,
+         sameSite: "none",
+         maxAge: 24 * 60 * 60 * 1000
       }
 
       const refreshOptions = {
          httpOnly: true,
-         secure: process.env.NODE_ENV === "production",
-         sameSite: "lax",
-         maxAge: 10 * 24 * 60 * 60 * 1000 // 10 days
+         secure: true,
+         sameSite: "none",
+         maxAge: 10 * 24 * 60 * 60 * 1000
       }
 
       res
@@ -332,7 +333,7 @@ const updateAccountDetail = asyncHandler(async (req, res) => {
    if (fullName) updateFields.fullName = trimmedName
    if (email) updateFields.email = trimmedEmail
    if (username) updateFields.username = trimmedUsername
-   if(description) updateFields.description = trimmedDescription
+   if (description) updateFields.description = trimmedDescription
 
    const user = await userModel.findByIdAndUpdate(
       req.user?._id,
